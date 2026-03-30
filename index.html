@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Deepak & Reshmi Wedding</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Tangerine:wght@700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="public-view">
+
+    <!-- Hero Decoration -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 10px; background: linear-gradient(to right, var(--secondary), var(--primary), var(--secondary)); z-index: 100;"></div>
+
+    <!-- Navbar/Header Static -->
+    <header class="header">
+        <div class="header-overlay">
+            <h1 id="wedding-title">Deepak & Reshmi</h1>
+            <p id="wedding-date-main">April 23 - April 26, 2026</p>
+            <div class="scroll-down">
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Music Control -->
+    <div id="music-control" title="Toggle Background Music">
+        <i class="fa-solid fa-play" id="music-icon"></i>
+    </div>
+    <audio id="bg-music" loop>
+        <source id="music-source" src="" type="audio/mpeg">
+    </audio>
+
+    <!-- Content Sections -->
+    <main>
+        <!-- 0. Add to Calendar -->
+        <section id="rsvp-actions" class="animate-up">
+            <div class="glass-card" style="text-align: center;">
+                <h3 class="serif">Save Our Date</h3>
+                <p class="quote-hinglish">"Date lock kar lo warna hum lock kar denge!"</p>
+                <div class="calendar-btns">
+                    <a href="#" class="btn btn-primary" id="add-to-calendar">
+                        <i class="fa-solid fa-calendar-check"></i> Add Everything to Calendar
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. Our Journey Gallery & Video -->
+        <section id="pre-wedding" class="title-deco animate-up">
+            <h2>Our Journey</h2>
+            <div class="gallery-container">
+                <div id="gallery-carousel" class="carousel">
+                    <!-- Dynamic -->
+                </div>
+                <div id="video-area" style="margin-top: 40px; display: flex; gap: 20px; flex-wrap: wrap;"
+                    class="glass-card">
+                    <div id="video-container-1" style="flex: 1; min-width: 300px;"></div>
+                    <div id="video-container-2" style="flex: 1; min-width: 300px;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Event Schedule -->
+        <section id="schedule" class="title-deco animate-up">
+            <h2>Wedding Events</h2>
+            <p style="text-align: center; margin-top: -20px; margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">(Click any card to add it to your calendar)</p>
+            <div id="event-list" class="event-grid">
+                <!-- Dynamic cards -->
+            </div>
+        </section>
+
+        <!-- 3. Couple Details -->
+        <section id="couple" class="title-deco animate-up">
+            <h2>The Couple</h2>
+            <div class="couple-grid">
+                <!-- Groom Card -->
+                <div id="groom-card" class="glass-card couple-info">
+                    <img id="groom-photo" src="" class="couple-photo-circle">
+                    <h3 class="serif">The Groom</h3>
+                    <h4 id="groom-name">Deepak</h4>
+                    <div class="bio-details">
+                        <p><strong>Parents:</strong> <span id="groom-parents"></span></p>
+                        <p><strong>Residence:</strong> <span id="groom-res"></span></p>
+                    </div>
+                </div>
+                <!-- Bride Card -->
+                <div id="bride-card" class="glass-card couple-info">
+                    <img id="bride-photo" src="" class="couple-photo-circle">
+                    <h3 class="serif">The Bride</h3>
+                    <h4 id="bride-name">Reshmi</h4>
+                    <div class="bio-details">
+                        <p><strong>Parents:</strong> <span id="bride-parents"></span></p>
+                        <p><strong>Residence:</strong> <span id="bride-res"></span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Wishes & Blessings -->
+        <section id="wishes" class="title-deco animate-up">
+            <h2>Wishes & Blessings</h2>
+            <div id="wishes-carousel" class="carousel-wishes">
+                <!-- Dynamic cards -->
+            </div>
+
+            <div id="wish-form-container" class="glass-card" style="max-width: 650px; margin: 40px auto; text-align: center;">
+                <h3 class="serif" style="margin-bottom: 20px;">Send Your Blessings</h3>
+                <form id="public-wish-form">
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <input type="text" id="guest-name" placeholder="Your Name" required
+                            style="width: 100%; border-radius: 12px; padding: 12px; border: 1px solid #ddd;">
+                        <textarea id="guest-msg" placeholder="Your Message (Max 150 characters)" maxlength="150"
+                            required
+                            style="width: 100%; border-radius: 12px; padding: 12px; border: 1px solid #ddd; height: 100px; resize: none;"></textarea>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Wish
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="color: white; opacity: 0.8;">© 2026 Deepak & Reshmi. All Rights Reserved.</p>
+            <p style="margin-top: 15px; font-size: 0.9rem; color: white; opacity: 1;">
+                Developed and Design by 
+                <a href="https://www.linkedin.com/company/apsra-web-development" target="_blank" style="color: #FFD700; text-decoration: none; font-weight: 700;">
+                    APSRA Web Development
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="app.js"></script>
+</body>
+
+</html>

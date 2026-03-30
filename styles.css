@@ -1,0 +1,146 @@
+/* 
+   Deepak & Reshmi Wedding Portfolio: Traditional Design System (Final Polish)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Tangerine:wght@700&display=swap');
+
+:root {
+    --primary: #8B1D1D; 
+    --secondary: #D4AF37; 
+    --accent: #FEF9F3; 
+    --text-main: #2D2D2D;
+    --glass: rgba(255, 255, 255, 0.7);
+    --transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    color: var(--text-main); 
+    line-height: 1.6; 
+    overflow-x: hidden;
+    background-color: var(--accent);
+}
+
+/* Background Overlay */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('images/hero.png') center/cover no-repeat;
+    opacity: 0.08;
+    z-index: -1;
+}
+
+h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+
+/* REDUCED SECTION SPACING */
+section { 
+    padding: 4rem 1.3rem; /* Reduced from 9rem to 4rem */
+    max-width: 1400px; 
+    margin: 0 auto; 
+    width: 100%; 
+    position: relative; 
+}
+
+/* Reduced spacing between titles and content */
+.title-deco { text-align: center; margin-bottom: 2.5rem; position: relative; }
+.title-deco h2 { font-size: 3.3rem; color: var(--primary); margin-bottom: 0.5rem; letter-spacing: 1px; }
+.title-deco::after { content: "❦ ────────────── ❦"; display: block; font-size: 1rem; color: var(--secondary); margin-top: 10px; opacity: 0.6; }
+
+/* Hero Section */
+.header { height: 100vh; background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('images/hero.png'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; text-align: center; color: white; background-attachment: fixed; }
+.header-overlay h1 { font-size: 6rem; letter-spacing: 4px; text-shadow: 2px 2px 25px rgba(0,0,0,0.6); margin-bottom: 15px; }
+.header-overlay p { font-size: 1.8rem; letter-spacing: 8px; text-transform: uppercase; font-weight: 300; }
+
+/* GLASS CARD (Simplified and lighter) */
+.glass-card { 
+    background: var(--glass); 
+    backdrop-filter: blur(15px); 
+    border: 1.5px solid var(--secondary); 
+    border-radius: 28px; 
+    padding: 2.5rem; 
+    box-shadow: 0 10px 40px rgba(139, 29, 29, 0.05); 
+    position: relative;
+    overflow: hidden;
+}
+
+/* PREMIUM WEDDING CARD (Wedding Events) */
+.event-card { 
+    background: white; 
+    border: 3px solid var(--secondary); 
+    border-radius: 30px; 
+    padding: 2.5rem 1.5rem; 
+    box-shadow: 0 15px 50px rgba(139, 29, 29, 0.1); 
+    position: relative;
+    transition: var(--transition);
+    border-bottom: 12px solid var(--primary); 
+    text-align: center;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-image: linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), url('images/gallery1.jpeg');
+    background-size: cover;
+}
+
+.event-card::before, .event-card::after { content: '𑁍'; font-size: 1.8rem; color: var(--secondary); position: absolute; opacity: 0.8; }
+.event-card::before { top: 10px; left: 10px; }
+.event-card::after { bottom: 10px; right: 10px; }
+.event-card:hover { transform: translateY(-10px); border-color: var(--primary); }
+
+.event-date-badge { 
+    background: var(--primary); color: white; border: 3px solid var(--secondary);
+    width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px;
+    display: flex; flex-direction: column; justify-content: center;
+}
+.event-date-badge span { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+.event-details h3 { font-size: 1.85rem; color: var(--primary); margin-bottom: 10px; }
+
+/* Grid Layout (4 Cols on Desktop) */
+.event-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+
+/* Couple Cards */
+.couple-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 3rem; }
+.couple-info { text-align: center; }
+.couple-photo-circle { width: 195px; height: 195px; border-radius: 50%; border: 5px solid var(--secondary); margin-bottom: 25px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+.couple-info h4 { font-size: 2.3rem; color: var(--primary); margin-bottom: 5px; }
+
+/* Wishes Slider */
+.carousel-wishes { display: flex; gap: 2.5rem; overflow-x: auto; padding: 2rem 0; scrollbar-width: none; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); scroll-snap-type: x mandatory; }
+.wish-card { min-width: min(90vw, 680px); display: flex; align-items: center; gap: 30px; padding: 2.5rem; scroll-snap-align: center; border-left: 10px solid var(--primary); border-top: 1px solid var(--secondary); }
+.wish-photo-circle { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--secondary); flex-shrink: 0; }
+.wish-msg { font-size: 1.3rem; font-style: italic; color: var(--primary); }
+
+/* Music Player Controls */
+#music-control { 
+    position: fixed; bottom: 35px; right: 35px; z-index: 1000; 
+    width: 65px; height: 65px; border-radius: 50%; 
+    background: var(--primary); color: white; border: 4px solid var(--secondary);
+    display: flex; align-items: center; justify-content: center; 
+    cursor: pointer; box-shadow: 0 10px 35px rgba(0,0,0,0.3); transition: var(--transition);
+}
+#music-control.pulse { animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+/* Other UI */
+.quote-hinglish { font-family: 'Tangerine', cursive; font-size: 3.5rem !important; margin: 15px 0; color: var(--primary); text-align: center; }
+.btn { padding: 18px 45px; border-radius: 70px; font-weight: 700; text-transform: uppercase; cursor: pointer; border: none; letter-spacing: 2px; }
+.btn-primary { background: linear-gradient(135deg, var(--primary), #a52424); color: white; border: 2.5px solid var(--secondary); }
+
+/* Carousels */
+.carousel { display: flex; gap: 20px; overflow-x: auto; padding: 2.5rem 0; scrollbar-width: none; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); scroll-snap-type: x mandatory; }
+.carousel::-webkit-scrollbar { display: none; }
+.gallery-item { min-width: 250px; height: 380px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); flex-shrink: 0; scroll-snap-align: start; }
+.gallery-img { width: 100%; height: 100%; object-fit: cover; }
+
+footer { padding: 80px 20px; text-align: center; background: #0a0a0a; color: white; border-top: 5px solid var(--secondary); }
+.admin-link { color: var(--secondary); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 3px; font-weight: 600; text-decoration: none; opacity: 0.8; }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+.animate-up { opacity: 0; }
+.animate-up.visible { animation: fadeInUp 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+@media (max-width: 1100px) { .event-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .event-grid { grid-template-columns: 1fr; } .couple-grid { grid-template-columns: 1fr; } section { padding: 3rem 1rem; } }
