@@ -1,9 +1,19 @@
-// Deepak & Reshmi Wedding Portfolio: Shared Schema & App Logic
+// Deepak & Reshmi Wedding Portfolio: Supabase Serverless Edition
+// Using Supabase for 100% Free, Perpetual Hosting on Netlify
+
+/**
+ * --- STEP 1: CONFIGURE YOUR SUPABASE ---
+ * After you create a Supabase project, replace these two strings with your 
+ * Project URL and your public 'anon' Key from the Project Settings -> API page.
+ */
+const SUPABASE_URL = "https://cmozswraxmorgprvvmwx.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_cUC4eQ2Q3SgWFBG4Fsm7qQ_glvLslVy";
+
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const WEDDING_DATA_KEY = 'deep_resh_wedding_v1';
-const API_BASE = "http://localhost:3000/api";
 
-const defaultData = {
+let appData = {
     wedding: {
         title: "Deepak & Reshmi",
         date: "April 23 - April 26, 2026",
@@ -24,295 +34,266 @@ const defaultData = {
         name: "Reshmi",
         degree: "B.A.",
         photo: "images/bride.jpeg",
-        parents: "Mrs. Ramia - Mr. Gorelal Ahir",
-        residence: "Chandpura, Alipura, District Chhatarpur (M.P.)"
+        parents: "Mrs. Savitri - Mr. Nandram Ahirwar (Ex-Sarpanch)",
+        residence: "Gram Post Sijai, District Chhatarpur (M.P.)"
     },
     events: [
-        { id: 1, title: "Mandap", date: "23", month: "April", time: "10:00 AM onwards", venue: "Groom's Residence, Chhatarpur" },
-        { id: 2, title: "Haldi/Mahandi", date: "24", month: "April", time: "11:00 AM onwards", venue: "Community Hall, Chhatarpur" },
-        { id: 3, title: "Tilak", date: "25", month: "April", time: "07:00 PM onwards", venue: "Hotel Chhatarpur Inn" },
-        { id: 4, title: "Vidai", date: "26", month: "April", time: "04:00 AM onwards", venue: "Bride's Residence, Alipura" }
+        { title: "Matra-Pujan, Mandap/Haldi", date: "23", time: "10:00 AM", venue: "Home (Nij-Niwas)", note: "Traditional rituals with family." },
+        { title: "Tilak & Sangeet", date: "24", time: "05:00 PM", venue: "Hotel / Community Hall", note: "An evening of dance & music." },
+        { title: "Baraat Prasthana", date: "25", time: "04:00 PM", venue: "To Chhatarpur", note: "The groom's departure ceremony." },
+        { title: "Wedding Ceremony", date: "26", time: "07:00 PM", venue: "Chhatarpur", note: "The auspicious main ceremony." }
     ],
-    gallery: [
-        { url: "images/gallery1.jpeg", caption: "Sweet Moments" },
-        { url: "images/gallery2.jpeg", caption: "Our Journey" },
-        { url: "images/gallery3.jpeg", caption: "Hand in Hand" },
-        { url: "images/gallery4.jpeg", caption: "Love Always" },
-        { url: "images/gallery5.jpeg", caption: "Memory Lane" },
-        { url: "images/gallery6.jpeg", caption: "Together Forever" }
-    ],
-    wishes: [
-        { id: 1, name: "Rahul Sharma", msg: "Wishing you both a lifetime of happiness!", photos: ["https://i.pravatar.cc/150?u=12"] }
-    ]
+    wishes: []
 };
 
-let appData = {};
-
+// ----------------------------------------------------
+// 1. DATA INITIALIZATION
+// ----------------------------------------------------
 async function initData() {
-    try {
-        const response = await fetch(`${API_BASE}/loadData`);
-        if (response.ok) { appData = await response.json(); } else { loadLocal(); }
-    } catch (e) { loadLocal(); }
-    try {
-        const wishRes = await fetch(`${API_BASE}/wishes`);
-        if (wishRes.ok) {
-            const serverWishes = await wishRes.json();
-            appData.wishes = [...serverWishes, ...appData.wishes.filter(w => !serverWishes.some(sw => sw.id === w.id))];
-        }
-    } catch (e) { }
+    // 1. Load Local fallback
+    const local = localStorage.getItem(WEDDING_DATA_KEY);
+    if (local) appData = JSON.parse(local);
+
+    // 2. Load from Supabase (Persistent Source)
+    if (supabase) {
+        try {
+            // A. Fetch App Config (if exists in a 'config' table)
+            const { data: config, error: configErr } = await supabase.from('wedding_config').select('*').single();
+            if (!configErr && config) {
+                appData.wedding = { ...appData.wedding, ...config.wedding };
+                appData.groom = { ...appData.groom, ...config.groom };
+                appData.bride = { ...appData.bride, ...config.bride };
+                appData.events = config.events || appData.events;
+            }
+
+            // B. Fetch Published Wishes
+            const { data: wishesData, error: wishErr } = await supabase
+                .from('wishes')
+                .select('*')
+                .eq('approved', true)
+                .order('created_at', { ascending: false });
+
+            if (!wishErr) appData.wishes = wishesData || [];
+            
+        } catch (err) { console.error("Supabase load error:", err); }
+    }
+
     renderApp();
     startAutoSliders();
     attemptAutoplay();
+    initPublicForms();
+    initCalendarMain();
 }
 
-function loadLocal() {
-    const stored = localStorage.getItem(WEDDING_DATA_KEY);
-    if (!stored) { appData = JSON.parse(JSON.stringify(defaultData)); } else { appData = JSON.parse(stored); }
-}
-
-function renderVideo(id, url) {
-    const container = document.getElementById(id);
-    if (!container || !url) return;
-
-    // Clean URL for YouTube embeds (handle youtu.be, youtube.com, etc.)
-    let embedUrl = url;
-    if (url.includes('youtu.be/')) {
-        const id = url.split('youtu.be/')[1].split('?')[0];
-        embedUrl = `https://www.youtube.com/embed/${id}`;
-    } else if (url.includes('watch?v=')) {
-        const id = url.split('v=')[1].split('&')[0];
-        embedUrl = `https://www.youtube.com/embed/${id}`;
-    }
-
-    const isEmbed = embedUrl.includes('youtube.com') || embedUrl.includes('vimeo.com') || embedUrl.includes('embed');
-
-    if (isEmbed) {
-        // Add autoplay, mute, and loop parameters for better first impression
-        const separator = embedUrl.includes('?') ? '&' : '?';
-        const finalUrl = `${embedUrl}${separator}autoplay=1&mute=1&rel=0&showinfo=0&loop=1`;
-
-        container.innerHTML = `
-            <div class="video-frame" style="width: 100%; max-width: 1000px; background: linear-gradient(135deg, var(--secondary), #f9e394); padding: 5px; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.3); margin: 0 auto;">
-                <iframe 
-                    style="width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 12px; display: block;" 
-                    src="${finalUrl}" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen title="Wedding Video">
-                </iframe>
-            </div>`;
-    } else {
-        container.innerHTML = `
-            <video width="100%" height="auto" autoplay muted loop playsinline 
-                style="border-radius:18px; box-shadow: 0 15px 45px rgba(0,0,0,0.2); background:#000;">
-                <source src="${url}" type="video/mp4">
-            </video>`;
-    }
-}
-
+// ----------------------------------------------------
+// 2. RENDERING LOGIC
+// ----------------------------------------------------
 function renderApp() {
-    if (!document.querySelector('.public-view')) return;
+    // Wedding Details
     document.getElementById('wedding-title').textContent = appData.wedding.title;
     document.getElementById('wedding-date-main').textContent = appData.wedding.date;
     renderVideo('video-container-1', appData.wedding.videoUrl1);
 
-    const audio = document.getElementById('bg-music');
-    if (audio) { document.getElementById('music-source').src = appData.wedding.musicUrl; audio.load(); }
+    // Dynamic Banner
+    const heroSection = document.querySelector('.header');
+    if (heroSection) heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('${appData.wedding.heroUrl}')`;
 
-    document.getElementById('groom-name').innerHTML = `${appData.groom.name} <small class="degree">(${appData.groom.degree})</small>`;
-    document.getElementById('groom-photo').src = appData.groom.photo;
+    // Groom & Bride
+    document.getElementById('groom-name').textContent = appData.groom.name;
+    document.getElementById('groom-degree').textContent = appData.groom.degree;
     document.getElementById('groom-parents').textContent = appData.groom.parents;
-    document.getElementById('groom-res').textContent = appData.groom.residence;
+    document.getElementById('groom-residence').textContent = appData.groom.residence;
+    document.getElementById('groom-photo-img').src = appData.groom.photo;
 
-    document.getElementById('bride-name').innerHTML = `${appData.bride.name} <small class="degree">(${appData.bride.degree})</small>`;
-    document.getElementById('bride-photo').src = appData.bride.photo;
+    document.getElementById('bride-name').textContent = appData.bride.name;
+    document.getElementById('bride-degree').textContent = appData.bride.degree;
     document.getElementById('bride-parents').textContent = appData.bride.parents;
-    document.getElementById('bride-res').textContent = appData.bride.residence;
+    document.getElementById('bride-residence').textContent = appData.bride.residence;
+    document.getElementById('bride-photo-img').src = appData.bride.photo;
 
+    // Events
     const eventList = document.getElementById('event-list');
-    eventList.innerHTML = (appData.events || []).map((ev, idx) => `
-        <div class="event-card" style="cursor: pointer;" onclick="addToCalendarSpecific(${idx})">
-            <div class="event-date-badge"><span>${ev.date}</span>${ev.month}</div>
+    eventList.innerHTML = appData.events.map((ev, idx) => `
+        <div class="event-card animate-up" onclick="addToCalendarSpecific(${idx})">
+            <div class="event-date-badge"><span>${ev.date}</span>APR</div>
             <div class="event-details">
                 <h3>${ev.title}</h3>
-                <div class="event-meta">
-                    <p><i class="fa-solid fa-clock"></i> ${ev.time}</p>
-                    <p><i class="fa-solid fa-location-dot"></i> ${ev.venue}</p>
+                <p><strong><i class="fa-solid fa-clock"></i> ${ev.time}</strong></p>
+                <p><i class="fa-solid fa-location-dot"></i> ${ev.venue}</p>
+                <p style="margin-top:10px; font-style:italic;">"${ev.note}"</p>
+                <div style="margin-top:15px; color:var(--primary); font-size:0.8rem; font-weight:700;">
+                    <i class="fa-solid fa-plus-circle"></i> REMIND ME
                 </div>
             </div>
         </div>
     `).join('');
 
-    const galleryCarousel = document.getElementById('gallery-carousel');
-    galleryCarousel.innerHTML = (appData.gallery || []).map(img => `
-        <div class="gallery-item">
-            <img src="${img.url}" class="gallery-img">
-            <div class="gallery-overlay"><div class="overlay-text">${img.caption}</div></div>
-        </div>
-    `).join('');
-
     renderWishes();
-    initCalendarMain();
-    initPublicForms();
+}
+
+function renderVideo(id, url) {
+    const container = document.getElementById(id);
+    if (!container || !url) return;
+    
+    let embedUrl = url;
+    if (url.includes('youtu.be/')) {
+        const vidId = url.split('youtu.be/')[1].split('?')[0];
+        embedUrl = `https://www.youtube.com/embed/${vidId}`;
+    } else if (url.includes('watch?v=')) {
+        const vidId = url.split('v=')[1].split('&')[0];
+        embedUrl = `https://www.youtube.com/embed/${vidId}`;
+    }
+
+    const separator = embedUrl.includes('?') ? '&' : '?';
+    const finalUrl = `${embedUrl}${separator}autoplay=1&mute=1&rel=0&showinfo=0&loop=1`;
+
+    container.innerHTML = `
+        <div class="video-frame" style="width: 100%; max-width: 1100px; background: linear-gradient(135deg, var(--secondary), #f9e394); padding: 4px; border-radius: 16px; box-shadow: 0 15px 45px rgba(0,0,0,0.4); margin: 0 auto; overflow: hidden;">
+            <div style="position: relative; width: 100%; padding-bottom: 42%; overflow: hidden; border-radius: 14px; background: #000;">
+                <iframe 
+                    style="position: absolute; top: 50%; left: 50%; width: 100%; height: 145%; border: none; transform: translate(-50%, -50%);" 
+                    src="${finalUrl}" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+        </div>`;
 }
 
 function renderWishes() {
     const wishesCarousel = document.getElementById('wishes-carousel');
     if (!wishesCarousel) return;
 
-    // Only display approved wishes in the slider
-    const approvedWishes = (appData.wishes || []).filter(w => w.approved === true);
-
-    if (approvedWishes.length === 0) {
-        wishesCarousel.innerHTML = `<div style="text-align:center; width:100%; padding:20px; color:var(--primary); font-style:italic;">No blessings yet. Be the first to wish!</div>`;
+    if (appData.wishes.length === 0) {
+        wishesCarousel.innerHTML = `<div style="text-align:center; width:100%; padding:20px; color:var(--primary); font-style:italic;">Waiting for your blessings...</div>`;
         return;
     }
 
-    wishesCarousel.innerHTML = approvedWishes.map(w => `
+    wishesCarousel.innerHTML = appData.wishes.map(w => `
         <div class="wish-card glass-card">
-            <div class="wish-profile">
-                <img src="${w.photos[0].startsWith('/public') ? 'http://localhost:3000' + w.photos[0] : w.photos[0]}" class="wish-photo-circle">
-            </div>
-            <div class="wish-content">
+            <img src="${w.photo_url || 'https://i.pravatar.cc/150?u=' + w.id}" class="wish-photo-circle">
+            <div style="flex: 1;">
                 <p class="wish-msg">"${w.msg}"</p>
-                <p class="wish-name">- ${w.name}</p>
+                <p style="margin-top: 15px; font-weight: 700; color: var(--secondary);">— ${w.name}</p>
             </div>
         </div>
     `).join('');
 }
 
-function startAutoSliders() {
-    const sliders = [
-        document.getElementById('gallery-carousel'),
-        document.getElementById('wishes-carousel')
-    ];
-    sliders.forEach(slider => {
-        if (!slider) return;
-        setInterval(() => {
-            const maxScroll = slider.scrollWidth - slider.clientWidth;
-            if (slider.scrollLeft >= maxScroll - 50) {
-                slider.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                const firstChild = slider.querySelector(':first-child');
-                if (firstChild) {
-                    const cardWidth = firstChild.offsetWidth + 20;
-                    slider.scrollBy({ left: cardWidth, behavior: 'smooth' });
-                }
-            }
-        }, 3000);
-    });
-}
-
+// ----------------------------------------------------
+// 3. FORM & WISH SUBMISSION
+// ----------------------------------------------------
 function initPublicForms() {
-    const wishForm = document.getElementById('public-wish-form');
     const msgArea = document.getElementById('guest-msg');
     const charCount = document.getElementById('char-count');
-
-    if (msgArea && charCount) {
-        msgArea.oninput = () => {
-            charCount.textContent = `${msgArea.value.length} / 150`;
-        };
+    if (msgArea) {
+        msgArea.oninput = (e) => charCount.textContent = `${e.target.value.length} / 150`;
     }
 
+    const wishForm = document.getElementById('public-wish-form');
     if (wishForm) {
         wishForm.onsubmit = async (e) => {
             e.preventDefault();
-            const nameEl = document.getElementById('guest-name');
-            if (!nameEl || !msgArea) return;
+            const btn = e.target.querySelector('button');
+            const name = document.getElementById('guest-name').value;
+            const msg = document.getElementById('guest-msg').value;
+            const photoFile = document.getElementById('guest-photo').files[0];
 
-            const formData = new FormData();
-            formData.append('name', nameEl.value || "Guest");
-            formData.append('msg', msgArea.value);
-
-            const photoInput = document.getElementById('guest-photo');
-            if (photoInput && photoInput.files[0]) {
-                formData.append('photo', photoInput.files[0]);
-            }
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Submitting...`;
 
             try {
-                const response = await fetch(`${API_BASE}/wishes`, {
-                    method: 'POST',
-                    body: formData
-                });
+                let photo_url = null;
 
-                if (response.ok) {
-                    const result = await response.json();
-                    // Don't unshift to slider immediately as it needs approval
-                    // But we can show a confirmation
+                // 1. Upload Photo to Supabase Storage if present
+                if (photoFile && supabase) {
+                    const fileName = `${Date.now()}-${photoFile.name}`;
+                    const { data: uploadData, error: uploadErr } = await supabase.storage
+                        .from('wedding-portfolio')
+                        .upload(fileName, photoFile);
+                    
+                    if (!uploadErr) {
+                        const { data: publicUrlData } = supabase.storage
+                            .from('wedding-portfolio')
+                            .getPublicUrl(fileName);
+                        photo_url = publicUrlData.publicUrl;
+                    }
+                }
+
+                // 2. Insert Wish into Database (Pending Approval)
+                if (supabase) {
+                    const { error } = await supabase.from('wishes').insert([
+                        { name: name || "Guest", msg: msg, photo_url: photo_url, approved: false }
+                    ]);
+                    if (error) throw error;
+                    
+                    alert("Blessing sent for approval! Thank you.");
                     wishForm.reset();
-                    if (charCount) charCount.textContent = "0 / 150";
-                    alert("Thank you! Your blessing has been sent to the couple for approval.");
+                    charCount.textContent = "0 / 150";
+                } else {
+                    throw new Error("Supabase is not connected.");
                 }
             } catch (err) {
-                console.error("Submission error:", err);
-                alert("Failed to send wish. Please try again.");
+                console.error(err);
+                alert("Fail to send wish. Please ensure Supabase is configured.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Submit Wish`;
             }
         };
     }
 }
 
-// MAIN CALENDAR (Total Wedding)
+// ----------------------------------------------------
+// 4. CALENDAR & UTILS
+// ----------------------------------------------------
 function initCalendarMain() {
     const calendarBtn = document.getElementById('add-to-calendar');
     if (!calendarBtn) return;
-    const dates = "20260423/20260427";
-    calendarBtn.onclick = () => {
-        const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Wedding of Deepak & Reshmi')}&dates=${dates}&details=${encodeURIComponent('Join us for the multi-day celebration of Deepak & Reshmi.')}&location=${encodeURIComponent('Chhatarpur, M.P.')}`;
-        window.open(url, '_blank');
-    };
+    calendarBtn.onclick = () => window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Deepak & Reshmi Wedding')}&dates=20260423/20260427&details=Joining the celebration!&location=Chhatarpur,MP`, '_blank');
 }
 
-// SPECIFIC CALENDAR (Individual Event)
 function addToCalendarSpecific(idx) {
     const ev = appData.events[idx];
     if (!ev) return;
-    const dates = `202604${ev.date}/202604${parseInt(ev.date) + 1}`;
-    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title + ' - Deepak & Reshmi Wedding')}&dates=${dates}&details=${encodeURIComponent(' Ceremony: ' + ev.title + ' | Time: ' + ev.time)}&location=${encodeURIComponent(ev.venue)}`;
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title + ' - Deepak & Reshmi')}&dates=202604${ev.date}/202604${parseInt(ev.date)+1}&details=${encodeURIComponent(ev.note)}&location=${encodeURIComponent(ev.venue)}`;
     window.open(url, '_blank');
 }
 
+// Sliders
 let isPlaying = false;
-const musicControl = document.getElementById('music-control');
+function startAutoSliders() {
+    const scrollers = document.querySelectorAll('.carousel, .carousel-wishes');
+    scrollers.forEach(el => {
+        let sc = 0;
+        setInterval(() => {
+            sc += 1.5;
+            if (sc >= el.scrollWidth - el.clientWidth) sc = 0;
+            el.scrollTo({ left: sc, behavior: 'auto' });
+        }, 50);
+    });
+}
+
 function toggleMusic() {
     const bgMusic = document.getElementById('bg-music');
-    if (!bgMusic) return;
+    const musicControl = document.getElementById('music-control');
     if (isPlaying) {
         bgMusic.pause(); document.getElementById('music-icon').className = 'fa-solid fa-play'; musicControl.classList.remove('pulse');
     } else {
-        bgMusic.play().catch(() => { }); document.getElementById('music-icon').className = 'fa-solid fa-pause'; musicControl.classList.add('pulse');
+        bgMusic.play().catch(() => {}); document.getElementById('music-icon').className = 'fa-solid fa-pause'; musicControl.classList.add('pulse');
     }
     isPlaying = !isPlaying;
 }
 
 function attemptAutoplay() {
     const bgMusic = document.getElementById('bg-music');
-    if (!bgMusic) return; // Exit if music element doesn't exist (e.g., admin page)
-
+    if (!bgMusic) return; 
     bgMusic.play().then(() => {
-        isPlaying = true;
-        const icon = document.getElementById('music-icon');
-        if (icon) icon.className = 'fa-solid fa-pause';
-        if (musicControl) musicControl.classList.add('pulse');
-    }).catch(() => {
-        const firstInteraction = () => {
-            if (!bgMusic) return;
-            bgMusic.play().then(() => {
-                isPlaying = true;
-                const icon = document.getElementById('music-icon');
-                if (icon) icon.className = 'fa-solid fa-pause';
-                if (musicControl) musicControl.classList.add('pulse');
-            });
-            ['click', 'scroll', 'touchstart'].forEach(ev => window.removeEventListener(ev, firstInteraction));
-        };
-        ['click', 'scroll', 'touchstart'].forEach(ev => window.addEventListener(ev, firstInteraction));
-    });
+        isPlaying = true; document.getElementById('music-icon').className = 'fa-solid fa-pause';
+        document.getElementById('music-control').classList.add('pulse');
+    }).catch(() => {});
 }
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-
-document.addEventListener('DOMContentLoaded', () => {
-    initData();
-    document.querySelectorAll('.animate-up').forEach(el => observer.observe(el));
-    if (musicControl) musicControl.onclick = toggleMusic;
-});
+document.addEventListener('DOMContentLoaded', initData);
+window.toggleMusic = toggleMusic;
+window.addToCalendarSpecific = addToCalendarSpecific;
