@@ -33,13 +33,18 @@ async function initAdmin() {
     }
 }
 
-loginForm.onsubmit = (e) => {
+loginForm.onsubmit = async (e) => {
     e.preventDefault();
-    if (document.getElementById('admin-pass').value === ADMIN_PASS) {
+    const passInput = document.getElementById('admin-pass').value.trim();
+    console.log("Attempting login with password length:", passInput.length);
+    
+    if (passInput === ADMIN_PASS) {
+        console.log("Login successful!");
         isAdmin = true;
         sessionStorage.setItem('wedding_admin_auth', 'true');
-        initAdmin();
+        await initAdmin();
     } else {
+        console.error("Login failed: Incorrect password.");
         alert("Incorrect Password. (DeepakReshmi2026)");
     }
 };
@@ -97,13 +102,58 @@ function renderAdminGallery() {
 }
 
 function renderAdminWishes() {
-    const list = document.getElementById('admin-wishes-list');
-    list.innerHTML = (appData.wishes || []).map(w => `
-        <div class="item-card">
-            <div class="item-info"><strong>${w.name}</strong>: ${w.msg}</div>
-            <button class="btn-sm btn-danger" onclick="deleteWish(${w.id})">Delete</button>
-        </div>
-    `).join('');
+    const listPending = document.getElementById('admin-wishes-pending');
+    const listApproved = document.getElementById('admin-wishes-approved');
+    if (!listPending || !listApproved) return;
+
+    const allWishes = appData.wishes || [];
+    
+    // Render Pending
+    const pending = allWishes.filter(w => !w.approved);
+    if (pending.length === 0) {
+        listPending.innerHTML = `<p style="opacity:0.6; font-style:italic;">No pending wishes.</p>`;
+    } else {
+        listPending.innerHTML = pending.map(w => `
+            <div class="item-card" style="border-left: 5px solid var(--secondary);">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${w.photos[0].startsWith('/public') ? 'http://localhost:3000' + w.photos[0] : w.photos[0]}" 
+                         class="wish-photo-circle" style="width: 45px; height: 45px;">
+                    <div class="item-info">
+                        <strong>${w.name}</strong><br>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">"${w.msg}"</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary btn-sm" onclick="approveWish(${w.id})"><i class="fa-solid fa-check"></i> Approve</button>
+                    <button class="btn btn-outline btn-sm" onclick="editWish(${w.id})"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteWish(${w.id})"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Render Approved
+    const approved = allWishes.filter(w => w.approved);
+    if (approved.length === 0) {
+        listApproved.innerHTML = `<p style="opacity:0.6; font-style:italic;">No approved wishes yet.</p>`;
+    } else {
+        listApproved.innerHTML = approved.map(w => `
+            <div class="item-card" style="border-left: 5px solid #28a745;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${w.photos[0].startsWith('/public') ? 'http://localhost:3000' + w.photos[0] : w.photos[0]}" 
+                         class="wish-photo-circle" style="width: 45px; height: 45px;">
+                    <div class="item-info">
+                        <strong>${w.name}</strong><br>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">"${w.msg}"</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-outline btn-sm" onclick="editWish(${w.id})" title="Edit"><i class="fa-solid fa-pen"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteWish(${w.id})" title="Remove"><i class="fa-solid fa-trash"></i> Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
 }
 
 async function validateUpload(file, maxMB, targetW, targetH, errorId) {
@@ -177,7 +227,73 @@ document.getElementById('form-gallery-add').onsubmit = async (e) => {
 
 function deleteEvent(id) { appData.events = appData.events.filter(ev => ev.id !== id); renderAdminEvents(); saveData(); }
 function deleteGallery(idx) { appData.gallery.splice(idx, 1); renderAdminGallery(); saveData(); }
-function deleteWish(id) { appData.wishes = appData.wishes.filter(w => w.id !== id); renderAdminWishes(); saveData(); }
+
+async function deleteWish(id) {
+    if (!confirm("Are you sure you want to delete this wish?")) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/wishes/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            appData.wishes = appData.wishes.filter(w => w.id !== id);
+            renderAdminWishes();
+            alert("Deleted successfully!");
+        }
+    } catch (e) {
+        console.error("Delete failed:", e);
+        // Fallback for local
+        appData.wishes = appData.wishes.filter(w => w.id !== id);
+        renderAdminWishes();
+        saveData();
+    }
+}
+
+async function approveWish(id) {
+    try {
+        const response = await fetch(`${API_BASE}/wishes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ approved: true })
+        });
+        if (response.ok) {
+            const index = appData.wishes.findIndex(w => w.id === id);
+            if (index !== -1) appData.wishes[index].approved = true;
+            renderAdminWishes();
+            alert("Wish approved and is now live on the slider!");
+        }
+    } catch (err) {
+        console.error("Approval error:", err);
+    }
+}
+
+async function editWish(id) {
+    const wish = appData.wishes.find(w => w.id === id);
+    if (!wish) return;
+
+    const newMsg = prompt("Edit the blessing message:", wish.msg);
+    if (newMsg === null) return; // User cancelled
+
+    const newName = prompt("Edit guest name:", wish.name);
+    if (newName === null) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/wishes/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ msg: newMsg, name: newName })
+        });
+        if (response.ok) {
+            const index = appData.wishes.findIndex(w => w.id === id);
+            if (index !== -1) {
+                appData.wishes[index].msg = newMsg;
+                appData.wishes[index].name = newName;
+            }
+            renderAdminWishes();
+            alert("Wish updated!");
+        }
+    } catch (err) {
+        console.error("Edit error:", err);
+    }
+}
 
 async function saveData() {
     localStorage.setItem('deep_resh_wedding_v1', JSON.stringify(appData));

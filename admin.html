@@ -144,8 +144,23 @@
             </div>
 
             <div id="wishes" class="tab-content">
-                <h3 class="serif">Guest Wishes</h3>
-                <div id="admin-wishes-list" class="card-list"></div>
+                <h3 class="serif">Manage Guest Wishes</h3>
+                
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: var(--secondary); margin-bottom: 15px;"><i class="fa-solid fa-clock-rotate-left"></i> Pending Approval</h4>
+                    <div id="admin-wishes-pending" class="card-list">
+                        <!-- Pending wishes will be rendered here -->
+                    </div>
+                </div>
+
+                <hr style="opacity: 0.2; margin: 30px 0;">
+
+                <div>
+                    <h4 style="color: #28a745; margin-bottom: 15px;"><i class="fa-solid fa-circle-check"></i> Approved & Live</h4>
+                    <div id="admin-wishes-approved" class="card-list">
+                        <!-- Approved wishes will be rendered here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>

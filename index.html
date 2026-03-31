@@ -122,6 +122,16 @@
                         <textarea id="guest-msg" placeholder="Your Message (Max 150 characters)" maxlength="150"
                             required
                             style="width: 100%; border-radius: 12px; padding: 12px; border: 1px solid #ddd; height: 100px; resize: none;"></textarea>
+                        
+                        <div style="text-align: left; margin-top: 5px;">
+                            <label style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 5px; display: block;">
+                                <i class="fa-solid fa-camera"></i> Optional: Add Your Photo
+                            </label>
+                            <input type="file" id="guest-photo" accept="image/*" 
+                                style="width: 100%; font-size: 0.8rem; padding: 8px; border: 1px dashed #ccc; border-radius: 8px; background: rgba(255,255,255,0.5);">
+                        </div>
+
+                        <div id="char-count" style="text-align: right; font-size: 0.8rem; margin-top: 5px; color: #666;">0 / 150</div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fa-solid fa-paper-plane"></i> Submit Wish
                         </button>

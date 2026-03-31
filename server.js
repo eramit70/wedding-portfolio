@@ -56,7 +56,8 @@ app.post('/api/wishes', upload.single('photo'), (req, res) => {
             id: Date.now(),
             name,
             msg,
-            photos: [photoUrl || "https://i.pravatar.cc/150"]
+            photos: [photoUrl || "https://i.pravatar.cc/150"],
+            approved: false // New wishes are pending by default
         };
 
         wishes.unshift(newWish);
@@ -66,6 +67,44 @@ app.post('/api/wishes', upload.single('photo'), (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, error: "Failed to save wish" });
+    }
+});
+
+// API: Update a wish (Approve/Edit)
+app.put('/api/wishes/:id', (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const updatedData = req.body;
+
+        const data = fs.readFileSync(WISHES_FILE, 'utf8');
+        let wishes = JSON.parse(data);
+
+        const index = wishes.findIndex(w => w.id === id);
+        if (index === -1) return res.status(404).json({ success: false, error: "Wish not found" });
+
+        wishes[index] = { ...wishes[index], ...updatedData };
+        fs.writeFileSync(WISHES_FILE, JSON.stringify(wishes, null, 2));
+
+        res.json({ success: true, wish: wishes[index] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: "Failed to update wish" });
+    }
+});
+
+// API: Delete a wish
+app.delete('/api/wishes/:id', (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const data = fs.readFileSync(WISHES_FILE, 'utf8');
+        let wishes = JSON.parse(data);
+
+        wishes = wishes.filter(w => w.id !== id);
+        fs.writeFileSync(WISHES_FILE, JSON.stringify(wishes, null, 2));
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
     }
 });
 
@@ -85,7 +124,7 @@ app.get('/api/loadData', (req, res) => {
     if (fs.existsSync(fullDataPath)) {
         res.json(JSON.parse(fs.readFileSync(fullDataPath, 'utf8')));
     } else {
-        res.status(404).json(null);
+        res.json(null); // Return null instead of 404 to avoid console errors before first save
     }
 });
 

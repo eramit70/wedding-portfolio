@@ -1,11 +1,21 @@
 [
   {
+    "id": 1774978943701,
+    "name": "amit",
+    "msg": "Afsdsdhdf",
+    "photos": [
+      "/public/img/wishes/wish-1774978943555-87716795.JPG"
+    ],
+    "approved": true
+  },
+  {
     "id": 1774896488124,
     "name": "Amit",
     "msg": "Paisa dede yrr",
     "photos": [
       "/public/img/wishes/wish-1774896487663-126423768.JPG"
-    ]
+    ],
+    "approved": true
   },
   {
     "id": 1774893390349,
@@ -13,6 +23,7 @@
     "msg": "asds",
     "photos": [
       "/public/img/wishes/wish-1774893390147-756547215.JPG"
-    ]
+    ],
+    "approved": true
   }
 ]

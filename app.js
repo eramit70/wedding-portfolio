@@ -132,7 +132,16 @@ function renderApp() {
 function renderWishes() {
     const wishesCarousel = document.getElementById('wishes-carousel');
     if (!wishesCarousel) return;
-    wishesCarousel.innerHTML = (appData.wishes || []).map(w => `
+    
+    // Only display approved wishes in the slider
+    const approvedWishes = (appData.wishes || []).filter(w => w.approved === true);
+    
+    if (approvedWishes.length === 0) {
+        wishesCarousel.innerHTML = `<div style="text-align:center; width:100%; padding:20px; color:var(--primary); font-style:italic;">No blessings yet. Be the first to wish!</div>`;
+        return;
+    }
+
+    wishesCarousel.innerHTML = approvedWishes.map(w => `
         <div class="wish-card glass-card">
             <div class="wish-profile">
                 <img src="${w.photos[0].startsWith('/public') ? 'http://localhost:3000' + w.photos[0] : w.photos[0]}" class="wish-photo-circle">
@@ -170,22 +179,47 @@ function startAutoSliders() {
 function initPublicForms() {
     const wishForm = document.getElementById('public-wish-form');
     const msgArea = document.getElementById('guest-msg');
-    if (msgArea) { msgArea.oninput = () => { document.getElementById('char-count').textContent = `${msgArea.value.length} / 150`; }; }
+    const charCount = document.getElementById('char-count');
+
+    if (msgArea && charCount) {
+        msgArea.oninput = () => {
+            charCount.textContent = `${msgArea.value.length} / 150`;
+        };
+    }
+
     if (wishForm) {
         wishForm.onsubmit = async (e) => {
             e.preventDefault();
+            const nameEl = document.getElementById('guest-name');
+            if (!nameEl || !msgArea) return;
+
             const formData = new FormData();
-            formData.append('name', document.getElementById('guest-name').value || "Guest");
+            formData.append('name', nameEl.value || "Guest");
             formData.append('msg', msgArea.value);
-            if (document.getElementById('guest-photo').files[0]) formData.append('photo', document.getElementById('guest-photo').files[0]);
+            
+            const photoInput = document.getElementById('guest-photo');
+            if (photoInput && photoInput.files[0]) {
+                formData.append('photo', photoInput.files[0]);
+            }
+
             try {
-                const response = await fetch(`${API_BASE}/wishes`, { method: 'POST', body: formData });
+                const response = await fetch(`${API_BASE}/wishes`, {
+                    method: 'POST',
+                    body: formData
+                });
+
                 if (response.ok) {
                     const result = await response.json();
-                    appData.wishes.unshift(result.wish);
-                    renderWishes(); wishForm.reset(); alert("Thank you for your blessings!");
+                    // Don't unshift to slider immediately as it needs approval
+                    // But we can show a confirmation
+                    wishForm.reset();
+                    if (charCount) charCount.textContent = "0 / 150";
+                    alert("Thank you! Your blessing has been sent to the couple for approval.");
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Submission error:", err);
+                alert("Failed to send wish. Please try again.");
+            }
         };
     }
 }
@@ -225,12 +259,21 @@ function toggleMusic() {
 
 function attemptAutoplay() {
     const bgMusic = document.getElementById('bg-music');
+    if (!bgMusic) return; // Exit if music element doesn't exist (e.g., admin page)
+    
     bgMusic.play().then(() => {
-        isPlaying = true; document.getElementById('music-icon').className = 'fa-solid fa-pause'; musicControl.classList.add('pulse');
+        isPlaying = true; 
+        const icon = document.getElementById('music-icon');
+        if (icon) icon.className = 'fa-solid fa-pause'; 
+        if (musicControl) musicControl.classList.add('pulse');
     }).catch(() => {
         const firstInteraction = () => {
+            if (!bgMusic) return;
             bgMusic.play().then(() => {
-                isPlaying = true; document.getElementById('music-icon').className = 'fa-solid fa-pause'; musicControl.classList.add('pulse');
+                isPlaying = true; 
+                const icon = document.getElementById('music-icon');
+                if (icon) icon.className = 'fa-solid fa-pause'; 
+                if (musicControl) musicControl.classList.add('pulse');
             });
             ['click', 'scroll', 'touchstart'].forEach(ev => window.removeEventListener(ev, firstInteraction));
         };
