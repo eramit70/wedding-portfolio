@@ -19,7 +19,9 @@
 <body class="public-view">
 
     <!-- Hero Decoration -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; height: 10px; background: linear-gradient(to right, var(--secondary), var(--primary), var(--secondary)); z-index: 100;"></div>
+    <div
+        style="position: absolute; top: 0; left: 0; right: 0; height: 10px; background: linear-gradient(to right, var(--secondary), var(--primary), var(--secondary)); z-index: 100;">
+    </div>
 
     <!-- Navbar/Header Static -->
     <header class="header">
@@ -49,7 +51,7 @@
                 <p class="quote-hinglish">"Date lock kar lo warna hum lock kar denge!"</p>
                 <div class="calendar-btns">
                     <a href="#" class="btn btn-primary" id="add-to-calendar">
-                        <i class="fa-solid fa-calendar-check"></i> Add Everything to Calendar
+                        <i class="fa-solid fa-calendar-check"></i> Add Calendar
                     </a>
                 </div>
             </div>
@@ -73,7 +75,8 @@
         <!-- 2. Event Schedule -->
         <section id="schedule" class="title-deco animate-up">
             <h2>Wedding Events</h2>
-            <p style="text-align: center; margin-top: -20px; margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">(Click any card to add it to your calendar)</p>
+            <p style="text-align: center; margin-top: -20px; margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">
+                (Click any card to add it to your calendar)</p>
             <div id="event-list" class="event-grid">
                 <!-- Dynamic cards -->
             </div>
@@ -113,7 +116,8 @@
                 <!-- Dynamic cards -->
             </div>
 
-            <div id="wish-form-container" class="glass-card" style="max-width: 650px; margin: 40px auto; text-align: center;">
+            <div id="wish-form-container" class="glass-card"
+                style="max-width: 650px; margin: 40px auto; text-align: center;">
                 <h3 class="serif" style="margin-bottom: 20px;">Send Your Blessings</h3>
                 <form id="public-wish-form">
                     <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -122,16 +126,18 @@
                         <textarea id="guest-msg" placeholder="Your Message (Max 150 characters)" maxlength="150"
                             required
                             style="width: 100%; border-radius: 12px; padding: 12px; border: 1px solid #ddd; height: 100px; resize: none;"></textarea>
-                        
+
                         <div style="text-align: left; margin-top: 5px;">
-                            <label style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 5px; display: block;">
+                            <label
+                                style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-bottom: 5px; display: block;">
                                 <i class="fa-solid fa-camera"></i> Optional: Add Your Photo
                             </label>
-                            <input type="file" id="guest-photo" accept="image/*" 
+                            <input type="file" id="guest-photo" accept="image/*"
                                 style="width: 100%; font-size: 0.8rem; padding: 8px; border: 1px dashed #ccc; border-radius: 8px; background: rgba(255,255,255,0.5);">
                         </div>
 
-                        <div id="char-count" style="text-align: right; font-size: 0.8rem; margin-top: 5px; color: #666;">0 / 150</div>
+                        <div id="char-count"
+                            style="text-align: right; font-size: 0.8rem; margin-top: 5px; color: #666;">0 / 150</div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fa-solid fa-paper-plane"></i> Submit Wish
                         </button>
@@ -146,8 +152,9 @@
         <div class="footer-content">
             <p style="color: white; opacity: 0.8;">© 2026 Deepak & Reshmi. All Rights Reserved.</p>
             <p style="margin-top: 15px; font-size: 0.9rem; color: white; opacity: 1;">
-                Developed and Design by 
-                <a href="https://www.linkedin.com/company/apsra-web-development" target="_blank" style="color: #FFD700; text-decoration: none; font-weight: 700;">
+                Developed and Design by
+                <a href="https://www.linkedin.com/company/apsra-web-development" target="_blank"
+                    style="color: #FFD700; text-decoration: none; font-weight: 700;">
                     APSRA Web Development
                 </a>
             </p>
