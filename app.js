@@ -1,46 +1,36 @@
-// Deepak & Reshmi: Clean Production Edition (Supabase Serverless)
-// ALL data managed via Database ONLY
-
+// Deepak & Reshmi: Dynamic Gallery visibility fix
 const SUPABASE_URL = "https://cmozswraxmorgprvvmwx.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_cUC4eQ2Q3SgWFBG4Fsm7qQ_glvLslVy";
-
 const sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-// Clean Data Structure (Waiting for DB)
 let appData = {
     wedding: { title: "Loading...", date: "", videoUrl1: "", heroUrl: "" },
     groom: { name: "", photo: "images/profile-placeholder.png", parents: "", residence: "" },
     bride: { name: "", photo: "images/profile-placeholder.png", parents: "", residence: "" },
-    events: [],
-    wishes: []
+    events: [], gallery: [], wishes: []
 };
 
 async function initData() {
-    console.log("🛠️ Fetching Wedding Data from Supabase...");
     if (sbClient) {
         try {
-            // Load live configuration
             const { data: dbConfig } = await sbClient.from('wedding_config').select('*').single();
             if (dbConfig) {
                 appData.wedding = { ...appData.wedding, ...dbConfig.wedding };
                 appData.groom = { ...appData.groom, ...dbConfig.groom };
                 appData.bride = { ...appData.bride, ...dbConfig.bride };
                 appData.events = dbConfig.events || [];
+                appData.gallery = dbConfig.gallery || [];
             }
-            // Load live wishes
-            const { data: wishesData } = await sbClient.from('wishes').select('*').eq('approved', true).order('created_at', { ascending: false });
-            if (wishesData) appData.wishes = wishesData;
-        } catch (err) { console.error("Database fetch failed. Using empty defaults.", err); }
+            const { data: ws } = await sbClient.from('wishes').select('*').eq('approved', true).order('created_at', { ascending: false });
+            if (ws) appData.wishes = ws;
+        } catch (err) { console.error(err); }
     }
-    
     renderApp();
-    initAnimations();
     startAutoSliders();
     attemptAutoplay();
     initPublicForms();
 }
 
-// Visual Renderers
 function renderApp() {
     const set = (id, val, attr = 'textContent') => { const el = document.getElementById(id); if (el) el[attr] = val || ""; };
     set('wedding-title', appData.wedding.title);
@@ -67,14 +57,33 @@ function renderApp() {
     }
     
     renderVideo('video-container-1', appData.wedding.videoUrl1);
+    renderGallery();
     renderWishes();
+    initAnimations(); // Run AFTER all content is in DOM
+}
+
+function renderGallery() {
+    const grid = document.getElementById('gallery-grid'); if(!grid) return;
+    if(!appData.gallery || appData.gallery.length === 0) {
+        grid.innerHTML = `<p style="text-align:center; width:100%; opacity:0.6;">Photos arriving soon...</p>`;
+        return;
+    }
+    grid.innerHTML = appData.gallery.map(img => `
+        <div class="gallery-item animate-up">
+            <img src="${img.url}" class="gallery-img" loading="lazy">
+        </div>`).join('');
+}
+
+function renderWishes() {
+    const car = document.getElementById('wishes-carousel'); if (!car) return;
+    car.innerHTML = appData.wishes.map(w => `<div class='wish-card glass-card animate-up' style='min-width:300px; display:flex; align-items:center; gap:15px; padding:20px;'><img src='${w.photo_url || 'https://i.pravatar.cc/100?u='+w.id}' style='width:65px; height:65px; border-radius:50%; object-fit:cover;'><div><p>"${w.msg}"</p><p style='font-weight:700;'>— ${w.name}</p></div></div>`).join('') || "<p style='width:100%; text-align:center;'>Waiting for blessings...</p>";
 }
 
 function initAnimations() {
     const obs = new IntersectionObserver((es) => {
-        es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
     }, { threshold: 0.1 });
-    document.querySelectorAll('.animate-up, .event-card').forEach(el => obs.observe(el));
+    document.querySelectorAll('.animate-up, .event-card, .gallery-item').forEach(el => obs.observe(el));
 }
 
 function renderVideo(id, url) {
@@ -84,39 +93,31 @@ function renderVideo(id, url) {
     container.innerHTML = `<div class="video-frame" style="width:100%; background:linear-gradient(135deg, var(--secondary), #f9e394); padding:4px; border-radius:15px; overflow:hidden;"><div style="position:relative; width:100%; padding-bottom:42%; overflow:hidden; border-radius:12px;"><iframe style="position:absolute; top:50%; left:50%; width:100%; height:145%; border:none; transform:translate(-50%, -50%);" src="https://www.youtube.com/embed/${vidId}?autoplay=1&mute=1&loop=1" allow="autoplay; encrypted-media; gyroscope;" allowfullscreen></iframe></div></div>`;
 }
 
-function renderWishes() {
-    const car = document.getElementById('wishes-carousel'); if (!car) return;
-    car.innerHTML = appData.wishes.map(w => `<div class='wish-card glass-card' style='min-width:300px; display:flex; align-items:center; gap:15px; padding:20px;'><img src='${w.photo_url || 'https://i.pravatar.cc/100?u='+w.id}' style='width:65px; height:65px; border-radius:50%; object-fit:cover;'><div><p>"${w.msg}"</p><p style='font-weight:700;'>— ${w.name}</p></div></div>`).join('') || "<p style='width:100%; text-align:center;'>Waiting for blessings...</p>";
-}
-
 function initPublicForms() {
     const form = document.getElementById('public-wish-form');
     if (form) {
         form.onsubmit = async (e) => {
             e.preventDefault();
             const btn = form.querySelector('button');
-            const name = document.getElementById('guest-name').value;
-            const msg = document.getElementById('guest-msg').value;
-            const photo = document.getElementById('guest-photo').files[0];
-            btn.innerHTML = "Submitting..."; btn.disabled = true;
+            const data = { name:document.getElementById('guest-name').value, msg:document.getElementById('guest-msg').value, photo:document.getElementById('guest-photo').files[0] };
+            if (data.photo && data.photo.size > (5*1024*1024)) { alert("Photo too big (>5MB)!"); return; }
+            btn.innerHTML = "Sending..."; btn.disabled = true;
             try {
-                let photoUrl = null;
-                if (photo && sbClient) {
-                    const fname = `${Date.now()}-${photo.name}`;
-                    const { error: upErr } = await sbClient.storage.from('wedding-portfolio').upload(fname, photo);
-                    if (!upErr) photoUrl = sbClient.storage.from('wedding-portfolio').getPublicUrl(fname).data.publicUrl;
+                let purl = null;
+                if (data.photo && sbClient) {
+                    const fn = `p-${Date.now()}-${data.photo.name.replace(/\s/g,'_')}`;
+                    await sbClient.storage.from('wedding-portfolio').upload(fn, data.photo);
+                    purl = sbClient.storage.from('wedding-portfolio').getPublicUrl(fn).data.publicUrl;
                 }
-                const { error } = await sbClient.from('wishes').insert([{ name, msg, photo_url: photoUrl, approved: false }]);
-                if (!error) { alert("Sent for approval!"); form.reset(); }
-            } catch (err) { alert("Fail to send."); }
+                await sbClient.from('wishes').insert([{ name:data.name, msg:data.msg, photo_url: purl, approved: false }]);
+                alert("Blessing sent for approval!"); form.reset();
+            } catch (err) { alert("Error sending."); }
             finally { btn.innerHTML = "Submit Wish"; btn.disabled = false; }
         };
     }
 }
 
-// Utils
+function startAutoSliders() { document.querySelectorAll('.carousel, .carousel-wishes').forEach(el => { let sc=0; setInterval(() => { sc += 1.5; if (sc >= el.scrollWidth - el.clientWidth) sc=0; el.scrollTo({ left: sc, behavior: 'auto' }); }, 50); }); }
 function attemptAutoplay() { const a = document.getElementById('bg-music'); if (a) a.play().catch(() => {}); }
-function startAutoSliders() { document.querySelectorAll('.carousel, .carousel-wishes').forEach(el => { let sc = 0; setInterval(() => { sc += 1.5; if (sc >= el.scrollWidth - el.clientWidth) sc = 0; el.scrollTo({ left: sc, behavior: 'auto' }); }, 50); }); }
-window.addToCalendarSpecific = (idx) => { const ev = appData.events[idx]; if (ev) window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title)}&dates=202604${ev.date}/202604${parseInt(ev.date)+1}`, '_blank'); };
 window.toggleMusic = () => { const a = document.getElementById('bg-music'); if (a.paused) a.play(); else a.pause(); };
 document.addEventListener('DOMContentLoaded', initData);
