@@ -75,6 +75,11 @@
                         <p id="hero-error" class="error-txt">Invalid image dimensions or size.</p>
                     </div>
                     <div class="form-group"><label>Event Date Text</label><input type="text" id="admin-date-text"></div>
+                    <div class="form-group">
+                        <label>Main Video URL (YouTube)</label>
+                        <input type="text" id="admin-video-url" placeholder="https://youtu.be/..." style="width: 100%;" onchange="updateVideoPreview()">
+                        <p class="val-info">Tip: Only one link is needed for the modern layout.</p>
+                    </div>
                     <div class="form-group"><label>Music URL</label><input type="text" id="admin-music-url"></div>
                     <button type="submit" class="btn btn-primary">Save Settings</button>
                 </form>

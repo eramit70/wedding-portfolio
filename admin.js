@@ -62,6 +62,7 @@ function loadAdminData() {
     document.getElementById('admin-date-text').value = appData.wedding.date || "";
     document.getElementById('admin-music-url').value = appData.wedding.musicUrl || "";
     document.getElementById('admin-hero-url').value = appData.wedding.heroUrl || "images/hero.png";
+    document.getElementById('admin-video-url').value = appData.wedding.videoUrl1 || "";
 
     // 2. COUPLE TAB
     document.getElementById('admin-groom-name').value = appData.groom.name || "";
@@ -178,6 +179,7 @@ document.getElementById('form-general').onsubmit = async (e) => {
     appData.wedding.title = document.getElementById('admin-title').value;
     appData.wedding.date = document.getElementById('admin-date-text').value;
     appData.wedding.musicUrl = document.getElementById('admin-music-url').value;
+    appData.wedding.videoUrl1 = document.getElementById('admin-video-url').value;
     appData.wedding.heroUrl = file ? "images/" + file.name : document.getElementById('admin-hero-url').value;
     saveData();
 };

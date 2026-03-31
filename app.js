@@ -8,8 +8,7 @@ const defaultData = {
         title: "Deepak & Reshmi",
         date: "April 23 - April 26, 2026",
         announcement: "The Beginning of Forever",
-        videoUrl1: "https://www.youtube.com/embed/dQw4w9WgXcQ", 
-        videoUrl2: "https://www.youtube.com/embed/dQw4w9WgXcQ", 
+        videoUrl1: "https://www.youtube.com/embed/sZUVG46nkD8", 
         musicUrl: "music/music1.mp4",
         heroUrl: "images/hero.png",
         eventLayout: "grid"
@@ -73,12 +72,42 @@ function loadLocal() {
 
 function renderVideo(id, url) {
     const container = document.getElementById(id);
-    if (!container) return;
-    const isEmbed = url.includes('youtube.com') || url.includes('vimeo.com') || url.includes('embed');
+    if (!container || !url) return;
+    
+    // Clean URL for YouTube embeds (handle youtu.be, youtube.com, etc.)
+    let embedUrl = url;
+    if (url.includes('youtu.be/')) {
+        const id = url.split('youtu.be/')[1].split('?')[0];
+        embedUrl = `https://www.youtube.com/embed/${id}`;
+    } else if (url.includes('watch?v=')) {
+        const id = url.split('v=')[1].split('&')[0];
+        embedUrl = `https://www.youtube.com/embed/${id}`;
+    }
+    
+    const isEmbed = embedUrl.includes('youtube.com') || embedUrl.includes('vimeo.com') || embedUrl.includes('embed');
+    
     if (isEmbed) {
-        container.innerHTML = `<iframe width="100%" height="350" src="${url}" frameborder="0" allowfullscreen style="border-radius:12px;"></iframe>`;
+        // Add autoplay, mute, and loop parameters for better first impression
+        const separator = embedUrl.includes('?') ? '&' : '?';
+        const finalUrl = `${embedUrl}${separator}autoplay=1&mute=1&rel=0&showinfo=0&loop=1`;
+        
+        container.innerHTML = `
+            <div class="video-frame" style="padding: 10px; background: linear-gradient(135deg, var(--secondary), #f9e394, var(--secondary)); border-radius: 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.4);">
+                <div class="video-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px;">
+                    <iframe 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" 
+                        src="${finalUrl}" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen title="Wedding Video">
+                    </iframe>
+                </div>
+            </div>`;
     } else {
-        container.innerHTML = `<video width="100%" height="350" controls style="border-radius:12px; background:#000;"><source src="${url}" type="video/mp4"></video>`;
+        container.innerHTML = `
+            <video width="100%" height="auto" autoplay muted loop playsinline 
+                style="border-radius:18px; box-shadow: 0 15px 45px rgba(0,0,0,0.2); background:#000;">
+                <source src="${url}" type="video/mp4">
+            </video>`;
     }
 }
 
@@ -87,7 +116,6 @@ function renderApp() {
     document.getElementById('wedding-title').textContent = appData.wedding.title;
     document.getElementById('wedding-date-main').textContent = appData.wedding.date;
     renderVideo('video-container-1', appData.wedding.videoUrl1);
-    renderVideo('video-container-2', appData.wedding.videoUrl2);
 
     const audio = document.getElementById('bg-music');
     if (audio) { document.getElementById('music-source').src = appData.wedding.musicUrl; audio.load(); }
