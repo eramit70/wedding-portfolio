@@ -8,7 +8,7 @@ const defaultData = {
         title: "Deepak & Reshmi",
         date: "April 23 - April 26, 2026",
         announcement: "The Beginning of Forever",
-        videoUrl1: "https://www.youtube.com/embed/sZUVG46nkD8", 
+        videoUrl1: "https://www.youtube.com/embed/sZUVG46nkD8",
         musicUrl: "music/music1.mp4",
         heroUrl: "images/hero.png",
         eventLayout: "grid"
@@ -59,7 +59,7 @@ async function initData() {
             const serverWishes = await wishRes.json();
             appData.wishes = [...serverWishes, ...appData.wishes.filter(w => !serverWishes.some(sw => sw.id === w.id))];
         }
-    } catch (e) {}
+    } catch (e) { }
     renderApp();
     startAutoSliders();
     attemptAutoplay();
@@ -73,7 +73,7 @@ function loadLocal() {
 function renderVideo(id, url) {
     const container = document.getElementById(id);
     if (!container || !url) return;
-    
+
     // Clean URL for YouTube embeds (handle youtu.be, youtube.com, etc.)
     let embedUrl = url;
     if (url.includes('youtu.be/')) {
@@ -83,24 +83,22 @@ function renderVideo(id, url) {
         const id = url.split('v=')[1].split('&')[0];
         embedUrl = `https://www.youtube.com/embed/${id}`;
     }
-    
+
     const isEmbed = embedUrl.includes('youtube.com') || embedUrl.includes('vimeo.com') || embedUrl.includes('embed');
-    
+
     if (isEmbed) {
         // Add autoplay, mute, and loop parameters for better first impression
         const separator = embedUrl.includes('?') ? '&' : '?';
         const finalUrl = `${embedUrl}${separator}autoplay=1&mute=1&rel=0&showinfo=0&loop=1`;
-        
+
         container.innerHTML = `
-            <div class="video-frame" style="padding: 10px; background: linear-gradient(135deg, var(--secondary), #f9e394, var(--secondary)); border-radius: 22px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.4);">
-                <div class="video-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px;">
-                    <iframe 
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" 
-                        src="${finalUrl}" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowfullscreen title="Wedding Video">
-                    </iframe>
-                </div>
+            <div class="video-frame" style="width: 100%; max-width: 1000px; background: linear-gradient(135deg, var(--secondary), #f9e394); padding: 5px; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.3); margin: 0 auto;">
+                <iframe 
+                    style="width: 100%; aspect-ratio: 16 / 9; border: none; border-radius: 12px; display: block;" 
+                    src="${finalUrl}" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen title="Wedding Video">
+                </iframe>
             </div>`;
     } else {
         container.innerHTML = `
@@ -160,10 +158,10 @@ function renderApp() {
 function renderWishes() {
     const wishesCarousel = document.getElementById('wishes-carousel');
     if (!wishesCarousel) return;
-    
+
     // Only display approved wishes in the slider
     const approvedWishes = (appData.wishes || []).filter(w => w.approved === true);
-    
+
     if (approvedWishes.length === 0) {
         wishesCarousel.innerHTML = `<div style="text-align:center; width:100%; padding:20px; color:var(--primary); font-style:italic;">No blessings yet. Be the first to wish!</div>`;
         return;
@@ -224,7 +222,7 @@ function initPublicForms() {
             const formData = new FormData();
             formData.append('name', nameEl.value || "Guest");
             formData.append('msg', msgArea.value);
-            
+
             const photoInput = document.getElementById('guest-photo');
             if (photoInput && photoInput.files[0]) {
                 formData.append('photo', photoInput.files[0]);
@@ -256,7 +254,7 @@ function initPublicForms() {
 function initCalendarMain() {
     const calendarBtn = document.getElementById('add-to-calendar');
     if (!calendarBtn) return;
-    const dates = "20260423/20260427"; 
+    const dates = "20260423/20260427";
     calendarBtn.onclick = () => {
         const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Wedding of Deepak & Reshmi')}&dates=${dates}&details=${encodeURIComponent('Join us for the multi-day celebration of Deepak & Reshmi.')}&location=${encodeURIComponent('Chhatarpur, M.P.')}`;
         window.open(url, '_blank');
@@ -267,7 +265,7 @@ function initCalendarMain() {
 function addToCalendarSpecific(idx) {
     const ev = appData.events[idx];
     if (!ev) return;
-    const dates = `202604${ev.date}/202604${parseInt(ev.date)+1}`;
+    const dates = `202604${ev.date}/202604${parseInt(ev.date) + 1}`;
     const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.title + ' - Deepak & Reshmi Wedding')}&dates=${dates}&details=${encodeURIComponent(' Ceremony: ' + ev.title + ' | Time: ' + ev.time)}&location=${encodeURIComponent(ev.venue)}`;
     window.open(url, '_blank');
 }
@@ -280,7 +278,7 @@ function toggleMusic() {
     if (isPlaying) {
         bgMusic.pause(); document.getElementById('music-icon').className = 'fa-solid fa-play'; musicControl.classList.remove('pulse');
     } else {
-        bgMusic.play().catch(() => {}); document.getElementById('music-icon').className = 'fa-solid fa-pause'; musicControl.classList.add('pulse');
+        bgMusic.play().catch(() => { }); document.getElementById('music-icon').className = 'fa-solid fa-pause'; musicControl.classList.add('pulse');
     }
     isPlaying = !isPlaying;
 }
@@ -288,19 +286,19 @@ function toggleMusic() {
 function attemptAutoplay() {
     const bgMusic = document.getElementById('bg-music');
     if (!bgMusic) return; // Exit if music element doesn't exist (e.g., admin page)
-    
+
     bgMusic.play().then(() => {
-        isPlaying = true; 
+        isPlaying = true;
         const icon = document.getElementById('music-icon');
-        if (icon) icon.className = 'fa-solid fa-pause'; 
+        if (icon) icon.className = 'fa-solid fa-pause';
         if (musicControl) musicControl.classList.add('pulse');
     }).catch(() => {
         const firstInteraction = () => {
             if (!bgMusic) return;
             bgMusic.play().then(() => {
-                isPlaying = true; 
+                isPlaying = true;
                 const icon = document.getElementById('music-icon');
-                if (icon) icon.className = 'fa-solid fa-pause'; 
+                if (icon) icon.className = 'fa-solid fa-pause';
                 if (musicControl) musicControl.classList.add('pulse');
             });
             ['click', 'scroll', 'touchstart'].forEach(ev => window.removeEventListener(ev, firstInteraction));
