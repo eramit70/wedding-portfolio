@@ -260,11 +260,15 @@
                 <hr style="margin:25px 0; opacity:0.1;">
                 <h4>Add New Event</h4>
                 <form id="form-event-add">
+                    <input type="hidden" id="edit-ev-idx" value="-1">
                     <div class="form-group"><input type="text" id="add-ev-title" placeholder="Event Title"></div>
-                    <div class="form-group"><input type="text" id="add-ev-day" placeholder="Day (e.g. 23)"></div>
-                    <div class="form-group"><input type="text" id="add-ev-time" placeholder="Time"></div>
+                    <div class="form-group"><label>Event Date</label><input type="date" id="add-ev-day" value="2026-04-23"></div>
+                    <div class="form-group"><label>Event Time</label><input type="time" id="add-ev-time" value="10:00"></div>
                     <div class="form-group"><input type="text" id="add-ev-venue" placeholder="Venue"></div>
-                    <button type="submit" class="btn btn-primary btn-sm">Add Locally</button>
+                    <div style="display:flex; gap:10px;">
+                        <button type="submit" id="btn-ev-add" class="btn btn-primary btn-sm">Add Locally</button>
+                        <button type="button" id="btn-ev-cancel" class="btn btn-outline btn-sm" style="display:none;" onclick="window.cancelEditEvent()">Cancel</button>
+                    </div>
                 </form>
             </div>
 

@@ -233,8 +233,32 @@ function renderAdminWishes() {
 }
 async function approveWish(id) { await sbClient.from('wishes').update({ approved: true }).eq('id', id); renderAdminWishes(); }
 async function deleteWish(id) { if (confirm("Delete wish?")) { await sbClient.from('wishes').delete().eq('id', id); renderAdminWishes(); } }
-function renderAdminEvents() { document.getElementById('admin-event-list').innerHTML = appData.events.map((ev, i) => `<div class="item-card"><div><strong>${ev.title}</strong> (${ev.date} APR)</div><button type='button' class="btn btn-danger btn-sm" onclick="window.deleteEvent(${i})">X</button></div>`).join('') || "No events."; }
+function renderAdminEvents() { document.getElementById('admin-event-list').innerHTML = appData.events.map((ev, i) => `<div class="item-card"><div><strong>${ev.title}</strong> (${ev.date} APR)</div><div style='display:flex;gap:5px;'><button type='button' class='btn btn-outline btn-sm' onclick='window.editEvent(${i})'><i class='fa-solid fa-edit'></i></button><button type='button' class="btn btn-danger btn-sm" onclick="window.deleteEvent(${i})">X</button></div></div>`).join('') || "No events."; }
 function deleteEvent(idx) { if (confirm("Delete event?")) { appData.events.splice(idx, 1); renderAdminEvents(); } }
+
+function editEvent(idx) {
+    const ev = appData.events[idx];
+    if (!ev) return;
+    document.getElementById('edit-ev-idx').value = idx;
+    document.getElementById('add-ev-title').value = ev.title;
+    
+    // Support converting simple "23" days into ISO date for the picker
+    const day = ev.date && ev.date.length <= 2 ? `2026-04-${ev.date.padStart(2, '0')}` : ev.date;
+    document.getElementById('add-ev-day').value = day || "2026-04-23";
+    
+    document.getElementById('add-ev-time').value = ev.time || "10:00";
+    document.getElementById('add-ev-venue').value = ev.venue;
+    document.getElementById('btn-ev-add').textContent = "Update Locally";
+    document.getElementById('btn-ev-cancel').style.display = 'block';
+    document.getElementById('form-event-add').parentElement.scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEditEvent() {
+    document.getElementById('edit-ev-idx').value = "-1";
+    document.getElementById('form-event-add').reset();
+    document.getElementById('btn-ev-add').textContent = "Add Locally";
+    document.getElementById('btn-ev-cancel').style.display = 'none';
+}
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.onclick = () => {
@@ -249,16 +273,27 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 window.approveWish = approveWish; window.deleteWish = deleteWish; window.deleteEvent = deleteEvent; 
 window.uploadToGallery = prepareGallery; window.deleteFromGallery = deleteFromGallery; window.removeDraft = removeDraft;
 window.syncToCloud = syncToCloud; window.previewSingle = previewSingle; window.handleLogout = () => { sessionStorage.clear(); location.reload(); };
-window.stageBanners = stageBanners;
+window.stageBanners = stageBanners; window.editEvent = editEvent; window.cancelEditEvent = cancelEditEvent;
 
     document.getElementById('form-event-add').onsubmit = (e) => {
         e.preventDefault();
+        const idx = parseInt(document.getElementById('edit-ev-idx').value);
         const title = document.getElementById('add-ev-title').value;
-        const day = document.getElementById('add-ev-day').value;
+        const fullDate = document.getElementById('add-ev-day').value;
         const time = document.getElementById('add-ev-time').value;
         const venue = document.getElementById('add-ev-venue').value;
-        if (title && day) {
-            appData.events.push({ title, date: day, time, venue });
+        
+        // Extract just the day part for compatibility with the card badge renderer
+        const dayOnly = fullDate ? fullDate.split('-').pop() : "23";
+        
+        if (title && dayOnly) {
+            const ev = { title, date: dayOnly, fullDate, time, venue };
+            if (idx === -1) {
+                appData.events.push(ev);
+            } else {
+                appData.events[idx] = ev;
+                cancelEditEvent();
+            }
             renderAdminEvents();
             e.target.reset();
         }
