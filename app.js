@@ -6,7 +6,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_cUC4eQ2Q3SgWFBG4Fsm7qQ_glvLslVy";
 const sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let appData = {
-    wedding: { title: "Deepak & Reshmi", date: "April 23-26, 2026", videoUrl1: "", heroUrl: "", musicUrl: "" },
+    wedding: { title: "Deepak & Reshmi", date: "April 23-26, 2026", videoUrl1: "", heroUrl: "", musicUrl: "", bannersDesktop: [], bannersMobile: [] },
     groom: { name: "", photo: "images/profile-placeholder.png", parents: "", residence: "", insta: "" },
     bride: { name: "", photo: "images/profile-placeholder.png", parents: "", residence: "", insta: "" },
     events: [], gallery: [], wishes: []
@@ -57,6 +57,7 @@ function renderApp() {
     renderGallery();
     renderWishes();
     setupMusic();
+    initHeroSlider();
     initAnimations();
 }
 
@@ -104,6 +105,31 @@ function setupCalendar() {
 function initAnimations() {
     const obs = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } }), { threshold: 0.1 });
     document.querySelectorAll('.animate-up').forEach(el => obs.observe(el));
+}
+
+function initHeroSlider() {
+    const cont = document.getElementById('hero-slider');
+    if (!cont) return;
+    
+    const isMobile = window.innerWidth <= 768;
+    const banners = (isMobile ? appData.wedding.bannersMobile : appData.wedding.bannersDesktop) || [];
+    
+    // Choose images list, fallback to heroUrl or default image
+    let images = banners.length > 0 ? banners : (appData.wedding.heroUrl ? [appData.wedding.heroUrl] : ['images/hero.png']);
+
+    cont.innerHTML = images.map((src, i) => `
+        <div class="hero-slide ${i === 0 ? 'active' : ''}" style="background-image: url('${src}')"></div>
+    `).join('');
+    
+    if (images.length > 1) {
+        let current = 0;
+        const slides = cont.querySelectorAll('.hero-slide');
+        setInterval(() => {
+            slides[current].classList.remove('active');
+            current = (current + 1) % slides.length;
+            slides[current].classList.add('active');
+        }, 6000);
+    }
 }
 
 function renderVideo(id, url) {

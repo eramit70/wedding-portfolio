@@ -183,13 +183,35 @@
                         <label>Background Music (MP3/MP4)</label>
                         <div style="display:flex; gap:10px;">
                             <input type="text" id="admin-music-url" placeholder="Direct URL or Upload ->">
-                            <input type="file" id="upload-music" accept="audio/*,video/mp4" style="width: auto;" onchange="window.previewSingle('upload-music', 'music')">
+                            <input type="file" id="upload-music" accept="audio/*,video/mp4" style="width: auto;"
+                                onchange="window.previewSingle('upload-music', 'music')">
                         </div>
                         <p id="music-status" class="val-info"></p>
                     </div>
-                    <div class="form-group"><label>Manual Hero Image URL</label><input type="text" id="admin-hero-url">
+                    <div class="form-group"><label>Manual Hero Image URL (Fallback)</label><input type="text"
+                            id="admin-hero-url"></div>
+
+                    <div style="border: 1px solid #ddd; padding: 15px; border-radius: 12px; margin-top: 20px;">
+                        <h4 class="serif" style="color:var(--primary);">Hero Slider Banners</h4>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                            <div>
+                                <label style="font-weight:700;">Desktop Banners</label>
+                                <input type="file" id="upload-banners-desktop" accept="image/*" multiple
+                                    onchange="window.stageBanners('desktop')">
+                                <div id="admin-banners-desktop"
+                                    style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px;">
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-weight:700;">Mobile Banners</label>
+                                <input type="file" id="upload-banners-mobile" accept="image/*" multiple
+                                    onchange="window.stageBanners('mobile')">
+                                <div id="admin-banners-mobile"
+                                    style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px;">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Lock Text & Preview</button>
                 </form>
             </div>
 
@@ -205,7 +227,8 @@
                             <div class="form-group"><label>New Photo</label><input type="file" id="upload-groom"
                                     accept="image/*" onchange="window.previewSingle('upload-groom', 'groom')"></div>
                             <div class="form-group"><label>Name</label><input type="text" id="admin-groom-name"></div>
-                            <div class="form-group"><label>Instagram URL</label><input type="text" id="admin-groom-insta" placeholder="https://instagram.com/deepak"></div>
+                            <div class="form-group"><label>Instagram URL</label><input type="text"
+                                    id="admin-groom-insta" placeholder="https://instagram.com/deepak"></div>
                             <div class="form-group"><label>Parents</label><input type="text" id="admin-groom-parents">
                             </div>
                             <div class="form-group"><label>Residence</label><textarea id="admin-groom-res"></textarea>
@@ -219,14 +242,14 @@
                             <div class="form-group"><label>New Photo</label><input type="file" id="upload-bride"
                                     accept="image/*" onchange="window.previewSingle('upload-bride', 'bride')"></div>
                             <div class="form-group"><label>Name</label><input type="text" id="admin-bride-name"></div>
-                            <div class="form-group"><label>Instagram URL</label><input type="text" id="admin-bride-insta" placeholder="https://instagram.com/reshmi"></div>
+                            <div class="form-group"><label>Instagram URL</label><input type="text"
+                                    id="admin-bride-insta" placeholder="https://instagram.com/reshmi"></div>
                             <div class="form-group"><label>Parents</label><input type="text" id="admin-bride-parents">
                             </div>
                             <div class="form-group"><label>Residence</label><textarea id="admin-bride-res"></textarea>
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="margin-top:20px;">Save Local State</button>
                 </form>
             </div>
 
@@ -277,7 +300,6 @@
                 </div>
             </div>
 
-            <!-- 5. Wishes -->
             <div id="wishes" class="tab-content">
                 <h3>Guest Blessings Management</h3>
                 <h4>Pending Approval</h4>

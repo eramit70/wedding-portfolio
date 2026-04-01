@@ -7,13 +7,13 @@ const sbClient = (window.supabase) ? window.supabase.createClient(SUPABASE_URL, 
 
 const ADMIN_PASS = "DeepakReshmi2026";
 let appData = {
-    wedding: { title: "", date: "", videoUrl1: "", musicUrl: "", heroUrl: "" },
+    wedding: { title: "", date: "", videoUrl1: "", musicUrl: "", heroUrl: "", bannersDesktop: [], bannersMobile: [] },
     groom: { name: "", photo: "", parents: "", residence: "", insta: "" },
     bride: { name: "", photo: "", parents: "", residence: "", insta: "" },
     events: [], gallery: [], wishes: []
 };
 
-let pendingUploads = { hero: null, groom: null, bride: null, music: null, gallery: [] };
+let pendingUploads = { hero: null, groom: null, bride: null, music: null, bannersDesktop: [], bannersMobile: [], gallery: [] };
 
 async function initAdmin() {
     console.log("🛠️ Admin Initializing...");
@@ -48,6 +48,8 @@ async function loadInitialData() {
             appData = data;
             if (!appData.groom.insta) appData.groom.insta = "";
             if (!appData.bride.insta) appData.bride.insta = "";
+            if (!appData.wedding.bannersDesktop) appData.wedding.bannersDesktop = [];
+            if (!appData.wedding.bannersMobile) appData.wedding.bannersMobile = [];
             if (!appData.gallery) appData.gallery = [];
         }
         loadDashboardData();
@@ -84,6 +86,45 @@ async function prepareGallery() {
     renderAdminGallery();
 }
 
+async function stageBanners(type) {
+    const input = document.getElementById(`upload-banners-${type}`);
+    if (!input || !input.files) return;
+    for (let file of input.files) {
+        if (file.size > 5 * 1024 * 1024) continue;
+        const tempUrl = URL.createObjectURL(file);
+        pendingUploads[`banners${type.charAt(0).toUpperCase() + type.slice(1)}`].push({ file, tempUrl });
+    }
+    renderAdminBanners();
+}
+
+function renderAdminBanners() {
+    const render = (type) => {
+        const pList = pendingUploads[`banners${type.charAt(0).toUpperCase() + type.slice(1)}`];
+        const liveList = appData.wedding[`banners${type.charAt(0).toUpperCase() + type.slice(1)}`];
+        const cont = document.getElementById(`admin-banners-${type}`);
+        if (!cont) return;
+        cont.innerHTML = `
+            ${pList.map((b, i) => `<div style='position:relative;'><img src='${b.tempUrl}' style='width:100%;height:60px;object-fit:cover;border:2px dashed var(--secondary);'><button onclick='window.removeBannerDraft("${type}", ${i})' style='position:absolute;top:0;right:0;background:red;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;'>X</button></div>`).join('')}
+            ${liveList.map((b, i) => `<div style='position:relative;'><img src='${b}' style='width:100%;height:60px;object-fit:cover;'><button onclick='window.deleteBannerLive("${type}", ${i})' style='position:absolute;top:0;right:0;background:rgba(0,0,0,0.5);color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;'>X</button></div>`).join('')}
+        `;
+    };
+    render('desktop'); render('mobile');
+}
+
+window.removeBannerDraft = (type, i) => {
+    pendingUploads[`banners${type.charAt(0).toUpperCase() + type.slice(1)}`].splice(i, 1);
+    renderAdminBanners();
+};
+
+window.deleteBannerLive = async (type, i) => {
+    if (confirm("Delete live banner?")) {
+        const key = `banners${type.charAt(0).toUpperCase() + type.slice(1)}`;
+        appData.wedding[key].splice(i, 1);
+        await sbClient.from('wedding_config').upsert({ id: 1, wedding:appData.wedding, groom:appData.groom, bride:appData.bride, events:appData.events, gallery: appData.gallery });
+        renderAdminBanners();
+    }
+};
+
 async function uploadOne(file) {
     if (!file || !sbClient) return null;
     const fn = `u-${Date.now()}-${file.name.replace(/\s/g, '_')}`;
@@ -102,11 +143,15 @@ async function syncToCloud() {
         if (pendingUploads.groom) { const u = await uploadOne(pendingUploads.groom); if (u) appData.groom.photo = u; }
         if (pendingUploads.bride) { const u = await uploadOne(pendingUploads.bride); if (u) appData.bride.photo = u; }
         if (pendingUploads.music) { const u = await uploadOne(pendingUploads.music); if (u) appData.wedding.musicUrl = u; }
+        
+        for (let b of pendingUploads.bannersDesktop) { const u = await uploadOne(b.file); if (u) appData.wedding.bannersDesktop.push(u); }
+        for (let b of pendingUploads.bannersMobile) { const u = await uploadOne(b.file); if (u) appData.wedding.bannersMobile.push(u); }
+
         for (let pg of pendingUploads.gallery) {
             const u = await uploadOne(pg.file);
             if (u) appData.gallery.push({ url: u });
         }
-        pendingUploads = { hero:null, groom:null, bride:null, music:null, gallery:[] };
+        pendingUploads = { hero:null, groom:null, bride:null, music:null, bannersDesktop: [], bannersMobile: [], gallery:[] };
         const ms = document.getElementById('music-status'); if(ms) ms.textContent = "";
 
         const getVal = (id) => document.getElementById(id)?.value || "";
@@ -143,7 +188,7 @@ function loadDashboardData() {
     setImg('preview-hero', appData.wedding.heroUrl, 'preview-hero-box');
     setImg('preview-groom', appData.groom.photo, 'preview-groom-box');
     setImg('preview-bride', appData.bride.photo, 'preview-bride-box');
-    renderAdminEvents(); renderAdminGallery(); renderAdminWishes();
+    renderAdminEvents(); renderAdminGallery(); renderAdminWishes(); renderAdminBanners();
 }
 
 function renderAdminGallery() {
@@ -191,5 +236,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 window.approveWish = approveWish; window.deleteWish = deleteWish; window.deleteEvent = deleteEvent; 
 window.uploadToGallery = prepareGallery; window.deleteFromGallery = deleteFromGallery; window.removeDraft = removeDraft;
 window.syncToCloud = syncToCloud; window.previewSingle = previewSingle; window.handleLogout = () => { sessionStorage.clear(); location.reload(); };
+window.stageBanners = stageBanners;
 
 document.addEventListener('DOMContentLoaded', initAdmin);
