@@ -67,7 +67,7 @@
                 <div id="gallery-grid" class="carousel">
                     <!-- Dynamic Gallery Photos -->
                 </div>
-                
+
                 <!-- VIDEO AREA -->
                 <div id="video-area"
                     style="margin-top: 40px; display: flex; justify-content: center; padding: 1.5rem; background: linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url('images/hero.png') center/cover; position: relative; overflow: hidden;"
@@ -80,8 +80,6 @@
         <!-- 2. Event Schedule -->
         <section id="schedule" class="title-deco animate-up">
             <h2>Wedding Events</h2>
-            <p style="text-align: center; margin-top: -20px; margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">
-                (Click any card to add it to your calendar)</p>
             <div id="event-list" class="event-grid">
                 <!-- Dynamic cards -->
             </div>
@@ -92,7 +90,7 @@
             <h2>The Couple</h2>
             <div class="couple-grid">
                 <!-- Groom Card -->
-                <div id="groom-card" class="glass-card couple-info">
+                <div id="groom-card" class="glass-card couple-info" onclick="window.openInstagram('groom')" style="cursor:pointer;" title="Visit Instagram">
                     <img id="groom-photo" src="" class="couple-photo-circle">
                     <h3 class="serif">The Groom</h3>
                     <h4 id="groom-name">Deepak</h4>
@@ -102,7 +100,7 @@
                     </div>
                 </div>
                 <!-- Bride Card -->
-                <div id="bride-card" class="glass-card couple-info">
+                <div id="bride-card" class="glass-card couple-info" onclick="window.openInstagram('bride')" style="cursor:pointer;" title="Visit Instagram">
                     <img id="bride-photo" src="" class="couple-photo-circle">
                     <h3 class="serif">The Bride</h3>
                     <h4 id="bride-name">Reshmi</h4>

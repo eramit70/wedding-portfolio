@@ -1,39 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Deepak & Reshmi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Tangerine:wght@700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Tangerine:wght@700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="data:,">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .admin-login { max-width: 450px; margin: 100px auto; padding: 40px; text-align: center; }
-        .admin-dashboard { display: none; padding: 40px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 10; }
-        .admin-nav { display: flex; gap: 10px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; border-bottom: 2px solid var(--primary); -webkit-overflow-scrolling: touch; }
-        .tab-btn { padding: 12px 25px; border: none; background: #eee; cursor: pointer; border-radius: 12px 12px 0 0; font-weight: 600; color: var(--primary); transition: 0.3s; white-space: nowrap; }
-        .tab-btn.active { background: var(--primary); color: white; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95rem; color: var(--primary); }
-        .form-group input, .form-group textarea { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; font-family: inherit; font-size: 1rem; }
-        .item-card { border: 2px solid #eee; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; background: white; margin-bottom: 10px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .val-info { font-size: 0.75rem; color: var(--secondary); margin-top: 5px; font-weight: 600; }
-        .img-preview-box { width: 100px; height: 100px; border-radius: 10px; overflow: hidden; border: 2px solid #eee; margin-bottom: 15px; background: #fafafa; position: relative; }
-        .img-preview-box img { width: 100%; height: 100%; object-fit: cover; }
-        .img-preview-box.pending { border: 3px dashed var(--secondary); }
+        .admin-login {
+            max-width: 450px;
+            margin: 100px auto;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .admin-dashboard {
+            display: none;
+            padding: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            border: none;
+            background: #eee;
+            cursor: pointer;
+            border-radius: 12px 12px 0 0;
+            font-weight: 600;
+            color: var(--primary);
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--primary);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .item-card {
+            border: 2px solid #eee;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            margin-bottom: 10px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .val-info {
+            font-size: 0.75rem;
+            color: var(--secondary);
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .img-preview-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #eee;
+            margin-bottom: 15px;
+            background: #fafafa;
+            position: relative;
+        }
+
+        .img-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .img-preview-box.pending {
+            border: 3px dashed var(--secondary);
+        }
     </style>
 </head>
+
 <body class="admin-view" style="background:#FDF5E6;">
 
     <div id="login-container" class="admin-login">
         <div class="glass-card login-card animate-up">
             <h2 class="serif" style="color:var(--primary);">Admin Login</h2>
             <form id="login-form">
-                <input type="password" id="admin-pass" placeholder="Password" required style="width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px;">
+                <input type="password" id="admin-pass" placeholder="Password" required
+                    style="width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; margin-bottom: 15px;">
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
             </form>
         </div>
@@ -41,7 +143,8 @@
 
     <div id="dashboard-container" class="admin-dashboard">
         <div class="glass-card">
-            <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <div
+                style="display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <h1 class="serif" style="color:var(--primary); margin: 0; font-size: 1.8rem;">Wedding Settings</h1>
                 <div style="display: flex; gap: 10px;">
                     <button id="btn-sync" class="btn btn-primary btn-sm" onclick="window.syncToCloud()">
@@ -68,14 +171,17 @@
                         </div>
                         <div class="form-group" style="flex:1;">
                             <label>Hero Banner Picture</label>
-                            <input type="file" id="upload-hero" accept="image/*" onchange="window.previewSingle('upload-hero', 'hero')">
+                            <input type="file" id="upload-hero" accept="image/*"
+                                onchange="window.previewSingle('upload-hero', 'hero')">
                         </div>
                     </div>
                     <div class="form-group"><label>Wedding Title</label><input type="text" id="admin-title"></div>
                     <div class="form-group"><label>Event Date Text</label><input type="text" id="admin-date-text"></div>
-                    <div class="form-group"><label>YouTube Video URL</label><input type="text" id="admin-video-url"></div>
+                    <div class="form-group"><label>YouTube Video URL</label><input type="text" id="admin-video-url">
+                    </div>
                     <div class="form-group"><label>Music URL</label><input type="text" id="admin-music-url"></div>
-                    <div class="form-group"><label>Manual Hero Image URL</label><input type="text" id="admin-hero-url"></div>
+                    <div class="form-group"><label>Manual Hero Image URL</label><input type="text" id="admin-hero-url">
+                    </div>
                     <button type="submit" class="btn btn-primary">Lock Text & Preview</button>
                 </form>
             </div>
@@ -89,20 +195,28 @@
                             <div id="preview-groom-box" class="img-preview-box">
                                 <img id="preview-groom" src="">
                             </div>
-                            <div class="form-group"><label>New Photo</label><input type="file" id="upload-groom" accept="image/*" onchange="window.previewSingle('upload-groom', 'groom')"></div>
+                            <div class="form-group"><label>New Photo</label><input type="file" id="upload-groom"
+                                    accept="image/*" onchange="window.previewSingle('upload-groom', 'groom')"></div>
                             <div class="form-group"><label>Name</label><input type="text" id="admin-groom-name"></div>
-                            <div class="form-group"><label>Parents</label><input type="text" id="admin-groom-parents"></div>
-                            <div class="form-group"><label>Residence</label><textarea id="admin-groom-res"></textarea></div>
+                            <div class="form-group"><label>Instagram URL</label><input type="text" id="admin-groom-insta" placeholder="https://instagram.com/deepak"></div>
+                            <div class="form-group"><label>Parents</label><input type="text" id="admin-groom-parents">
+                            </div>
+                            <div class="form-group"><label>Residence</label><textarea id="admin-groom-res"></textarea>
+                            </div>
                         </div>
                         <div>
                             <h4>Bride Profile</h4>
                             <div id="preview-bride-box" class="img-preview-box">
                                 <img id="preview-bride" src="">
                             </div>
-                            <div class="form-group"><label>New Photo</label><input type="file" id="upload-bride" accept="image/*" onchange="window.previewSingle('upload-bride', 'bride')"></div>
+                            <div class="form-group"><label>New Photo</label><input type="file" id="upload-bride"
+                                    accept="image/*" onchange="window.previewSingle('upload-bride', 'bride')"></div>
                             <div class="form-group"><label>Name</label><input type="text" id="admin-bride-name"></div>
-                            <div class="form-group"><label>Parents</label><input type="text" id="admin-bride-parents"></div>
-                            <div class="form-group"><label>Residence</label><textarea id="admin-bride-res"></textarea></div>
+                            <div class="form-group"><label>Instagram URL</label><input type="text" id="admin-bride-insta" placeholder="https://instagram.com/reshmi"></div>
+                            <div class="form-group"><label>Parents</label><input type="text" id="admin-bride-parents">
+                            </div>
+                            <div class="form-group"><label>Residence</label><textarea id="admin-bride-res"></textarea>
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="margin-top:20px;">Save Local State</button>
@@ -128,24 +242,30 @@
             <div id="gallery" class="tab-content">
                 <h3 class="serif">Our Journey Gallery (Staging Area)</h3>
                 <div class="glass-card" style="padding:20px; margin-bottom:20px; text-align:center;">
-                    <label class="btn btn-primary btn-sm" style="display:inline-block; margin-bottom:10px; cursor:pointer;">
+                    <label class="btn btn-primary btn-sm"
+                        style="display:inline-block; margin-bottom:10px; cursor:pointer;">
                         <i class="fa-solid fa-camera"></i> Stage Multiple Photos
-                        <input type="file" id="gallery-uploader" accept="image/*" multiple style="display:none;" onchange="window.uploadToGallery()">
+                        <input type="file" id="gallery-uploader" accept="image/*" multiple style="display:none;"
+                            onchange="window.uploadToGallery()">
                     </label>
                     <p class="val-info">Dashed Border = Waiting to Sync | Solid Border = On Cloud</p>
                 </div>
 
                 <!-- 🟡 PENDING / STAGED AREA -->
-                <h5 style="margin-bottom:10px; color:var(--secondary);"><i class="fa-solid fa-clock-rotate-left"></i> Recently Staged (Ready to Sync)</h5>
-                <div id="admin-gallery-pending" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px; margin-bottom:30px;">
+                <h5 style="margin-bottom:10px; color:var(--secondary);"><i class="fa-solid fa-clock-rotate-left"></i>
+                    Recently Staged (Ready to Sync)</h5>
+                <div id="admin-gallery-pending"
+                    style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px; margin-bottom:30px;">
                     <!-- Pending items will appear here -->
                 </div>
 
                 <hr style="opacity:0.1; margin:30px 0;">
 
                 <!-- 🟢 LIVE AREA -->
-                <h5 style="margin-bottom:10px; color:var(--primary);"><i class="fa-solid fa-cloud"></i> Live Gallery (On Cloud)</h5>
-                <div id="admin-gallery-live" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px;">
+                <h5 style="margin-bottom:10px; color:var(--primary);"><i class="fa-solid fa-cloud"></i> Live Gallery (On
+                    Cloud)</h5>
+                <div id="admin-gallery-live"
+                    style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px;">
                     <!-- Verified items will appear here -->
                 </div>
             </div>
@@ -163,4 +283,5 @@
 
     <script src="admin.js"></script>
 </body>
+
 </html>
