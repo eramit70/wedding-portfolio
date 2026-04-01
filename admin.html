@@ -126,16 +126,27 @@
 
             <!-- 4. Gallery (The Masterpiece) -->
             <div id="gallery" class="tab-content">
-                <h3>Our Journey Gallery (Staging)</h3>
+                <h3 class="serif">Our Journey Gallery (Staging Area)</h3>
                 <div class="glass-card" style="padding:20px; margin-bottom:20px; text-align:center;">
                     <label class="btn btn-primary btn-sm" style="display:inline-block; margin-bottom:10px; cursor:pointer;">
                         <i class="fa-solid fa-camera"></i> Stage Multiple Photos
                         <input type="file" id="gallery-uploader" accept="image/*" multiple style="display:none;" onchange="window.uploadToGallery()">
                     </label>
-                    <p class="val-info">Dashed border = Pending Sync | Solid border = On Cloud</p>
+                    <p class="val-info">Dashed Border = Waiting to Sync | Solid Border = On Cloud</p>
                 </div>
-                <div id="admin-gallery-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px;">
-                    <!-- Gallery items will appear here -->
+
+                <!-- 🟡 PENDING / STAGED AREA -->
+                <h5 style="margin-bottom:10px; color:var(--secondary);"><i class="fa-solid fa-clock-rotate-left"></i> Recently Staged (Ready to Sync)</h5>
+                <div id="admin-gallery-pending" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px; margin-bottom:30px;">
+                    <!-- Pending items will appear here -->
+                </div>
+
+                <hr style="opacity:0.1; margin:30px 0;">
+
+                <!-- 🟢 LIVE AREA -->
+                <h5 style="margin-bottom:10px; color:var(--primary);"><i class="fa-solid fa-cloud"></i> Live Gallery (On Cloud)</h5>
+                <div id="admin-gallery-live" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:15px;">
+                    <!-- Verified items will appear here -->
                 </div>
             </div>
 
