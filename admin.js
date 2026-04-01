@@ -104,8 +104,8 @@ function renderAdminBanners() {
         const cont = document.getElementById(`admin-banners-${type}`);
         if (!cont) return;
         cont.innerHTML = `
-            ${pList.map((b, i) => `<div style='position:relative;'><img src='${b.tempUrl}' style='width:100%;height:60px;object-fit:cover;border:2px dashed var(--secondary);'><button onclick='window.removeBannerDraft("${type}", ${i})' style='position:absolute;top:0;right:0;background:red;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;'>X</button></div>`).join('')}
-            ${liveList.map((b, i) => `<div style='position:relative;'><img src='${b}' style='width:100%;height:60px;object-fit:cover;'><button onclick='window.deleteBannerLive("${type}", ${i})' style='position:absolute;top:0;right:0;background:rgba(0,0,0,0.5);color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;'>X</button></div>`).join('')}
+            ${pList.map((b, i) => `<div style='position:relative;'><img src='${b.tempUrl}' style='width:100%;height:60px;object-fit:cover;border:2px dashed var(--secondary);'><button type='button' onclick='window.removeBannerDraft("${type}", ${i})' style='position:absolute;top:0;right:0;background:red;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;'>X</button></div>`).join('')}
+            ${liveList.map((b, i) => `<div style='position:relative;'><img src='${b}' style='width:100%;height:60px;object-fit:cover;'><button type='button' onclick='window.deleteBannerLive("${type}", ${i})' style='position:absolute;top:0;right:0;background:rgba(0,0,0,0.5);color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;'>X</button></div>`).join('')}
         `;
     };
     render('desktop'); render('mobile');
@@ -193,9 +193,9 @@ function loadDashboardData() {
 
 function renderAdminGallery() {
     const p = document.getElementById('admin-gallery-pending');
-    if (p) p.innerHTML = pendingUploads.gallery.map((pg, i) => `<div style='position:relative;border-radius:10px;overflow:hidden;border:3px dashed var(--secondary);'><img src='${pg.url}' style='width:100%;height:120px;object-fit:cover;opacity:0.6'><button onclick='window.removeDraft(${i})' style='position:absolute;top:5px;right:5px;background:rgba(180,0,0,0.8);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;'>X</button></div>`).join('') || "<p style='grid-column:1/-1;text-align:center;opacity:0.4;'>Drafts appear here.</p>";
+    if (p) p.innerHTML = pendingUploads.gallery.map((pg, i) => `<div style='position:relative;border-radius:10px;overflow:hidden;border:3px dashed var(--secondary);'><img src='${pg.url}' style='width:100%;height:120px;object-fit:cover;opacity:0.6'><button type='button' onclick='window.removeDraft(${i})' style='position:absolute;top:5px;right:5px;background:rgba(180,0,0,0.8);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;'>X</button></div>`).join('') || "<p style='grid-column:1/-1;text-align:center;opacity:0.4;'>Drafts appear here.</p>";
     const l = document.getElementById('admin-gallery-live');
-    if (l) l.innerHTML = appData.gallery.map((img, i) => `<div style='position:relative;border-radius:10px;overflow:hidden;border:2px solid #eee;'><img src='${img.url}' style='width:100%;height:120px;object-fit:cover;'><button onclick='window.deleteFromGallery(${i})' style='position:absolute;top:5px;right:5px;background:rgba(0,0,0,0.5);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;'>X</button></div>`).join('') || "<p style='grid-column:1/-1;text-align:center;opacity:0.4;'>Live Gallery.</p>";
+    if (l) l.innerHTML = appData.gallery.map((img, i) => `<div style='position:relative;border-radius:10px;overflow:hidden;border:2px solid #eee;'><img src='${img.url}' style='width:100%;height:120px;object-fit:cover;'><button type='button' onclick='window.deleteFromGallery(${i})' style='position:absolute;top:5px;right:5px;background:rgba(0,0,0,0.5);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;'>X</button></div>`).join('') || "<p style='grid-column:1/-1;text-align:center;opacity:0.4;'>Live Gallery.</p>";
 }
 
 function removeDraft(i) { pendingUploads.gallery.splice(i, 1); renderAdminGallery(); }
@@ -213,14 +213,27 @@ function renderAdminWishes() {
     if(!sbClient) return;
     sbClient.from('wishes').select('*').order('id', { ascending: false }).then(({ data: ws }) => {
         if(!ws) return;
-        const render = (w) => `<div class='item-card'>${w.name}: ${w.msg} <div style='display:flex;gap:5px;'>${!w.approved ? `<button class='btn btn-primary btn-sm' onclick='window.approveWish(${w.id})'>Ok</button>` : ''}<button class='btn btn-danger btn-sm' onclick='window.deleteWish(${w.id})'>X</button></div></div>`;
+        const render = (w) => `
+            <div class='item-card'>
+                <div style='display:flex; items:center; gap:12px;'>
+                    ${w.photo_url ? `<img src='${w.photo_url}' style='width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid #ddd;'>` : `<div style='width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:8px;color:#ccc;'><i class='fa-solid fa-user'></i></div>`}
+                    <div>
+                        <div style='font-weight:700; font-size:0.9rem;'>${w.name}</div>
+                        <div style='font-size:0.8rem; opacity:0.7;'>${w.msg}</div>
+                    </div>
+                </div>
+                <div style='display:flex;gap:5px;'>
+                    ${!w.approved ? `<button type='button' class='btn btn-primary btn-sm' onclick='window.approveWish(${w.id})'>Approve</button>` : ''}
+                    <button type='button' class='btn btn-danger btn-sm' onclick='window.deleteWish(${w.id})'>X</button>
+                </div>
+            </div>`;
         document.getElementById('admin-wishes-pending').innerHTML = ws.filter(w => !w.approved).map(render).join('') || "None.";
         document.getElementById('admin-wishes-approved').innerHTML = ws.filter(w => w.approved).map(render).join('') || "None.";
     });
 }
 async function approveWish(id) { await sbClient.from('wishes').update({ approved: true }).eq('id', id); renderAdminWishes(); }
 async function deleteWish(id) { if (confirm("Delete wish?")) { await sbClient.from('wishes').delete().eq('id', id); renderAdminWishes(); } }
-function renderAdminEvents() { document.getElementById('admin-event-list').innerHTML = appData.events.map((ev, i) => `<div class="item-card"><div><strong>${ev.title}</strong> (${ev.date} APR)</div><button class="btn btn-danger btn-sm" onclick="window.deleteEvent(${i})">X</button></div>`).join('') || "No events."; }
+function renderAdminEvents() { document.getElementById('admin-event-list').innerHTML = appData.events.map((ev, i) => `<div class="item-card"><div><strong>${ev.title}</strong> (${ev.date} APR)</div><button type='button' class="btn btn-danger btn-sm" onclick="window.deleteEvent(${i})">X</button></div>`).join('') || "No events."; }
 function deleteEvent(idx) { if (confirm("Delete event?")) { appData.events.splice(idx, 1); renderAdminEvents(); } }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -238,4 +251,17 @@ window.uploadToGallery = prepareGallery; window.deleteFromGallery = deleteFromGa
 window.syncToCloud = syncToCloud; window.previewSingle = previewSingle; window.handleLogout = () => { sessionStorage.clear(); location.reload(); };
 window.stageBanners = stageBanners;
 
-document.addEventListener('DOMContentLoaded', initAdmin);
+    document.getElementById('form-event-add').onsubmit = (e) => {
+        e.preventDefault();
+        const title = document.getElementById('add-ev-title').value;
+        const day = document.getElementById('add-ev-day').value;
+        const time = document.getElementById('add-ev-time').value;
+        const venue = document.getElementById('add-ev-venue').value;
+        if (title && day) {
+            appData.events.push({ title, date: day, time, venue });
+            renderAdminEvents();
+            e.target.reset();
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', initAdmin);

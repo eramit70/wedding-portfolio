@@ -12,6 +12,8 @@ let appData = {
     events: [], gallery: [], wishes: []
 };
 
+let musicStarted = false;
+
 async function initData() {
     if (sbClient) {
         try {
@@ -146,7 +148,7 @@ function setupMusic() {
 
     // Set Source: Cloud music if available, else local fallback
     const musicSrc = appData.wedding.musicUrl || 'music/music1.mp4';
-    if (audio.src !== musicSrc) {
+    if (musicSrc && !audio.src.includes(musicSrc)) {
         audio.src = musicSrc;
         audio.load();
     }
@@ -155,6 +157,7 @@ function setupMusic() {
         audio.play().then(() => {
             icon.className = 'fa-solid fa-pause';
             control.classList.add('pulse');
+            musicStarted = true;
         }).catch(e => console.log("Autoplay still blocked"));
     };
 
@@ -162,28 +165,30 @@ function setupMusic() {
         audio.pause();
         icon.className = 'fa-solid fa-play';
         control.classList.remove('pulse');
+        musicStarted = false; // Allow manual stop
     };
 
     control.onclick = () => (audio.paused ? playMusic() : pauseMusic());
 
-    // Try playing immediately
-    playMusic();
-
-    // Browser workaround: Start music on first interaction (click, scroll, or touch)
-    const startOnInteraction = () => {
-        if (audio.paused) {
-            playMusic();
-            // Remove all interaction listeners once playing
-            ['click', 'touchstart', 'mousedown', 'keydown'].forEach(ev => 
-                document.removeEventListener(ev, startOnInteraction)
-            );
-        }
-    };
-
-    ['click', 'touchstart', 'mousedown', 'keydown'].forEach(ev => 
-        document.addEventListener(ev, startOnInteraction, { once: true })
-    );
+    // Try playing immediately if browser allows
+    if (!musicStarted) playMusic();
 }
+
+// Global Interaction Handler - Catch first click from guest
+['click', 'touchstart', 'mousedown', 'keydown'].forEach(ev => 
+    document.addEventListener(ev, () => {
+        const audio = document.getElementById('bg-music');
+        if (audio && audio.paused && !musicStarted) {
+            audio.play().then(() => {
+                const icon = document.getElementById('music-icon');
+                const control = document.getElementById('music-control');
+                if(icon) icon.className = 'fa-solid fa-pause';
+                if(control) control.classList.add('pulse');
+                musicStarted = true;
+            }).catch(() => {});
+        }
+    }, { once: true })
+);
 
 function initPublicForms() {
     const form = document.getElementById('public-wish-form');
