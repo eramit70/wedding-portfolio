@@ -56,6 +56,7 @@ function renderApp() {
     renderVideo('video-container-1', appData.wedding.videoUrl1);
     renderGallery();
     renderWishes();
+    setupMusic();
     initAnimations();
 }
 
@@ -109,6 +110,53 @@ function renderVideo(id, url) {
     const c = document.getElementById(id); if (!c || !url) return;
     const vId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
     c.innerHTML = `<iframe style="width:100%; aspect-ratio:16/9; border-radius:15px; border:none;" src="https://www.youtube.com/embed/${vId}" allowfullscreen></iframe>`;
+}
+
+function setupMusic() {
+    const audio = document.getElementById('bg-music');
+    const control = document.getElementById('music-control');
+    const icon = document.getElementById('music-icon');
+    if (!audio || !control) return;
+
+    // Set Source: Cloud music if available, else local fallback
+    const musicSrc = appData.wedding.musicUrl || 'music/music1.mp4';
+    if (audio.src !== musicSrc) {
+        audio.src = musicSrc;
+        audio.load();
+    }
+
+    const playMusic = () => {
+        audio.play().then(() => {
+            icon.className = 'fa-solid fa-pause';
+            control.classList.add('pulse');
+        }).catch(e => console.log("Autoplay still blocked"));
+    };
+
+    const pauseMusic = () => {
+        audio.pause();
+        icon.className = 'fa-solid fa-play';
+        control.classList.remove('pulse');
+    };
+
+    control.onclick = () => (audio.paused ? playMusic() : pauseMusic());
+
+    // Try playing immediately
+    playMusic();
+
+    // Browser workaround: Start music on first interaction (click, scroll, or touch)
+    const startOnInteraction = () => {
+        if (audio.paused) {
+            playMusic();
+            // Remove all interaction listeners once playing
+            ['click', 'touchstart', 'mousedown', 'keydown'].forEach(ev => 
+                document.removeEventListener(ev, startOnInteraction)
+            );
+        }
+    };
+
+    ['click', 'touchstart', 'mousedown', 'keydown'].forEach(ev => 
+        document.addEventListener(ev, startOnInteraction, { once: true })
+    );
 }
 
 function initPublicForms() {

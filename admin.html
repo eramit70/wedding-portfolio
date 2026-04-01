@@ -179,7 +179,14 @@
                     <div class="form-group"><label>Event Date Text</label><input type="text" id="admin-date-text"></div>
                     <div class="form-group"><label>YouTube Video URL</label><input type="text" id="admin-video-url">
                     </div>
-                    <div class="form-group"><label>Music URL</label><input type="text" id="admin-music-url"></div>
+                    <div class="form-group">
+                        <label>Background Music (MP3/MP4)</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="admin-music-url" placeholder="Direct URL or Upload ->">
+                            <input type="file" id="upload-music" accept="audio/*,video/mp4" style="width: auto;" onchange="window.previewSingle('upload-music', 'music')">
+                        </div>
+                        <p id="music-status" class="val-info"></p>
+                    </div>
                     <div class="form-group"><label>Manual Hero Image URL</label><input type="text" id="admin-hero-url">
                     </div>
                     <button type="submit" class="btn btn-primary">Lock Text & Preview</button>

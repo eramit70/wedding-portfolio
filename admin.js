@@ -13,7 +13,7 @@ let appData = {
     events: [], gallery: [], wishes: []
 };
 
-let pendingUploads = { hero: null, groom: null, bride: null, gallery: [] };
+let pendingUploads = { hero: null, groom: null, bride: null, music: null, gallery: [] };
 
 async function initAdmin() {
     console.log("🛠️ Admin Initializing...");
@@ -56,8 +56,15 @@ async function loadInitialData() {
 
 function previewSingle(inputId, type) {
     const file = document.getElementById(inputId).files[0];
-    if (!file || file.size > 5 * 1024 * 1024) return;
+    if (!file || file.size > 15 * 1024 * 1024) { alert("File too large! Max 15MB"); return; }
     pendingUploads[type] = file;
+    
+    if (type === 'music') {
+        const info = document.getElementById('music-status');
+        if (info) info.textContent = `🎵 ${file.name} staged (Sync to Upload)`;
+        return;
+    }
+
     const tempUrl = URL.createObjectURL(file);
     const imgEl = document.getElementById(`preview-${type}`);
     const boxEl = document.getElementById(`preview-${type}-box`);
@@ -94,11 +101,13 @@ async function syncToCloud() {
         if (pendingUploads.hero) { const u = await uploadOne(pendingUploads.hero); if (u) appData.wedding.heroUrl = u; }
         if (pendingUploads.groom) { const u = await uploadOne(pendingUploads.groom); if (u) appData.groom.photo = u; }
         if (pendingUploads.bride) { const u = await uploadOne(pendingUploads.bride); if (u) appData.bride.photo = u; }
+        if (pendingUploads.music) { const u = await uploadOne(pendingUploads.music); if (u) appData.wedding.musicUrl = u; }
         for (let pg of pendingUploads.gallery) {
             const u = await uploadOne(pg.file);
             if (u) appData.gallery.push({ url: u });
         }
-        pendingUploads = { hero:null, groom:null, bride:null, gallery:[] };
+        pendingUploads = { hero:null, groom:null, bride:null, music:null, gallery:[] };
+        const ms = document.getElementById('music-status'); if(ms) ms.textContent = "";
 
         const getVal = (id) => document.getElementById(id)?.value || "";
         appData.wedding.title = getVal('admin-title');
@@ -124,6 +133,7 @@ function loadDashboardData() {
     const s = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ""; };
     s('admin-title', appData.wedding.title); s('admin-date-text', appData.wedding.date);
     s('admin-video-url', appData.wedding.videoUrl1); s('admin-hero-url', appData.wedding.heroUrl);
+    s('admin-music-url', appData.wedding.musicUrl);
     s('admin-groom-name', appData.groom.name); s('admin-groom-insta', appData.groom.insta);
     s('admin-groom-parents', appData.groom.parents); s('admin-groom-res', appData.groom.residence);
     s('admin-bride-name', appData.bride.name); s('admin-bride-insta', appData.bride.insta);
