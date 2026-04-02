@@ -2,6 +2,12 @@
 <html lang="en">
 
 <head>
+    <!-- Favicon -->
+    <!-- <link rel="icon" type="image/png" href="images/logowhitetext.png">
+    <link rel="shortcut icon" href="images/logowhitetext.png"> -->
+    <!-- Website Logo -->
+    </a>
+</div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
@@ -151,6 +157,11 @@
 
     <footer>
         <div class="footer-content">
+            <div class="footer-logo">
+                <a href="https://www.linkedin.com/company/apsra-web-development" target="_blank">
+                    <img src="images/apsralogo.png" alt="APSRA Logo">
+                </a>
+            </div>
             <p class="copyright">© 2026 Deepak & Reshmi. All Rights Reserved.</p>
             <p class="developer">
                 Developed and Design by
@@ -158,9 +169,92 @@
                     APSRA Web Development ❤️
                 </a>
             </p>
-        </div>
-    </footer>
+             <div class="social-icons">
 
+                <!-- Instagram -->
+                <a href="https://instagram.com/your_username" target="_blank" class="instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <!-- WhatsApp -->
+                <a href="https://wa.me/917024134470?text=Hello%20I%20am%20interested%20in%20your%20wedding%20services"
+                    target="_blank" class="whatsapp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+
+                <!-- Gmail -->
+                <a href="mailto:yourgmail@gmail.com" class="gmail">
+                    <i class="fas fa-envelope"></i>
+                </a>
+
+            </div>
+            <div class="contact-text">
+        <p>
+            <i class="fas fa-envelope"></i> apsra.webdevelopment@gmail.com
+        </p>
+        <p>
+            <i class="fas fa-phone"></i> +91 70241 34470 , 79877 45435
+        </p>
+    </div>
+
+            <!-- Bottom -->
+            <div class="footer-bottom">
+                ❤️ Made with love for Deepak & Reshmi Wedding
+            </div>
+        </div>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ===== FOOTER ===== */
+
+        .footer-logo img {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
+        .footer-content a {
+            color: #00c6ff;
+            text-decoration: none;
+        }
+
+        .social-icons {
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 20px;
+            width: 42px;
+            height: 42px;
+            line-height: 42px;
+            border-radius: 50%;
+            transition: 0.4s;
+            color: white;
+        }
+
+        /* Colors */
+        .instagram { background: #E1306C; }
+        .whatsapp { background: #25D366; }
+        .gmail { background: #EA4335; }
+
+        /* Hover Effect */
+        .social-icons a:hover {
+            transform: scale(1.2) rotate(10deg);
+            box-shadow: 0 0 12px rgba(255,255,255,0.6);
+        }
+
+        .footer-bottom {
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 10px;
+            font-size: 14px;
+        }
+     </style>
+    </footer>
     <!-- Main Logic -->
     <script src="app.js"></script>
 </body>
